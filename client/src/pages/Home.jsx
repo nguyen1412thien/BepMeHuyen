@@ -170,7 +170,7 @@ const Home = () => {
         </main>
 
         {/* Right Side: Floating Shopping Cart */}
-        <aside className="cart-sidebar">
+        <aside className="cart-sidebar" id="cart-section">
           <div className="cart-card">
             <h2><i className="fa-solid fa-cart-shopping"></i> Giỏ Món Ăn</h2>
             
@@ -266,6 +266,26 @@ const Home = () => {
           </div>
         </aside>
       </div>
+
+      {/* Nút Giỏ Hàng Nổi Trên Di Động (Floating Mobile Cart Button) */}
+      {cart.length > 0 && (
+        <button 
+          onClick={() => {
+            const cartElement = document.getElementById('cart-section');
+            if (cartElement) {
+              cartElement.scrollIntoView({ behavior: 'smooth' });
+            }
+          }} 
+          className="mobile-floating-cart-btn"
+          title="Xem giỏ hàng của bạn"
+        >
+          <span className="cart-icon-badge">
+            <i className="fa-solid fa-cart-shopping"></i>
+            <span className="count">{cart.reduce((s, i) => s + i.quantity, 0)}</span>
+          </span>
+          <span className="cart-price">{totalAmount.toLocaleString('vi-VN')} đ</span>
+        </button>
+      )}
 
       {/* Success Modal */}
       {orderSuccess && (
@@ -744,6 +764,142 @@ const Home = () => {
         .order-details-card strong {
           color: var(--secondary);
           font-size: 1rem;
+        }
+
+        /* Responsive Mobile Layouts & Premium Interactions */
+        .mobile-floating-cart-btn {
+          display: none;
+          position: fixed;
+          bottom: 24px;
+          right: 24px;
+          background: linear-gradient(135deg, var(--primary) 0%, #FF8F6B 100%);
+          border: none;
+          border-radius: 50px;
+          padding: 14px 24px;
+          color: #FFF;
+          align-items: center;
+          gap: 12px;
+          box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
+          z-index: 9999;
+          font-family: var(--font-main);
+          font-weight: 700;
+          font-size: 1rem;
+          cursor: pointer;
+          transition: var(--transition-smooth);
+          animation: pulseGlow 2s infinite ease-in-out;
+        }
+
+        .mobile-floating-cart-btn:hover {
+          transform: scale(1.05) translateY(-2px);
+          box-shadow: 0 12px 30px rgba(255, 107, 53, 0.55);
+        }
+
+        .cart-icon-badge {
+          position: relative;
+          display: flex;
+          align-items: center;
+          font-size: 1.25rem;
+        }
+
+        .cart-icon-badge .count {
+          position: absolute;
+          top: -8px;
+          right: -10px;
+          background: var(--bg-dark);
+          color: var(--secondary);
+          font-size: 0.7rem;
+          font-weight: 800;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid var(--secondary);
+        }
+
+        @keyframes pulseGlow {
+          0% {
+            box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
+          }
+          50% {
+            box-shadow: 0 10px 35px rgba(255, 107, 53, 0.7);
+          }
+          100% {
+            box-shadow: 0 10px 25px rgba(255, 107, 53, 0.4);
+          }
+        }
+
+        @media (max-width: 992px) {
+          .layout-grid {
+            grid-template-columns: 1fr;
+            gap: 24px;
+          }
+          .cart-sidebar {
+            position: relative;
+            top: 0;
+            margin-top: 20px;
+          }
+          .mobile-floating-cart-btn {
+            display: flex;
+          }
+        }
+
+        @media (max-width: 600px) {
+          .hero-section {
+            padding: 30px 16px 20px;
+          }
+          .hero-section h1 {
+            font-size: 2.1rem;
+          }
+          .hero-section p {
+            font-size: 0.9rem;
+          }
+          .categories-bar {
+            gap: 8px;
+            margin-bottom: 16px;
+          }
+          .category-btn {
+            padding: 6px 14px;
+            font-size: 0.8rem;
+          }
+          .food-grid {
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+          }
+          .food-card {
+            border-radius: 16px;
+          }
+          .food-image-wrapper {
+            height: 150px;
+          }
+          .food-info {
+            padding: 16px;
+          }
+          .food-name {
+            font-size: 1.05rem;
+            margin-bottom: 6px;
+          }
+          .food-desc {
+            font-size: 0.8rem;
+            margin-bottom: 12px;
+          }
+          .food-price {
+            font-size: 1.1rem;
+          }
+          .add-to-cart-btn {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+          }
+          .cart-card {
+            padding: 16px;
+            border-radius: 16px;
+          }
+          .modal-content {
+            padding: 24px;
+            border-radius: 20px;
+            margin: 16px;
+          }
         }
       ` }} />
     </div>

@@ -164,6 +164,49 @@ const Navbar = ({ user, onLogout }) => {
           color: var(--danger);
           background: rgba(239, 68, 68, 0.1);
         }
+
+        @media (max-width: 600px) {
+          .navbar {
+            height: 60px;
+          }
+          .navbar-container {
+            padding: 0 12px;
+          }
+          .navbar-logo {
+            font-size: 1.1rem;
+            gap: 6px;
+          }
+          .navbar-logo i {
+            font-size: 1.25rem;
+          }
+          .navbar-links {
+            gap: 8px;
+          }
+          .nav-link {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            gap: 4px;
+          }
+          .user-profile-menu {
+            padding: 4px 8px;
+            gap: 6px;
+            border-radius: 8px;
+          }
+          .user-greeting {
+            font-size: 0.75rem;
+            max-width: 110px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+          .btn-logout {
+            font-size: 0.85rem;
+          }
+          .nav-btn {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+          }
+        }
       ` }} />
     </nav>
   );
