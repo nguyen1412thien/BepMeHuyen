@@ -49,6 +49,12 @@ const Home = () => {
     { id: 'Dessert', name: 'Tráng Miệng' }
   ];
 
+  // Dịch mã danh mục tiếng Anh sang tiếng Việt hiển thị
+  const getCategoryTranslation = (categoryKey) => {
+    const found = categories.find(cat => cat.id === categoryKey);
+    return found ? found.name : categoryKey;
+  };
+
   // Cart operations
   const addToCart = (item) => {
     setCart(prevCart => {
@@ -151,7 +157,7 @@ const Home = () => {
                 <div key={item.id} className="food-card">
                   <div className="food-image-wrapper">
                     <img src={item.image_url} alt={item.name} className="food-image" />
-                    <span className="food-category-badge">{item.category}</span>
+                    <span className="food-category-badge">{getCategoryTranslation(item.category)}</span>
                   </div>
                   <div className="food-info">
                     <h3 className="food-name">{item.name}</h3>
