@@ -5,12 +5,12 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 3000,
+    port: 5500,
     host: true, // Cho phép truy cập mạng cục bộ
     proxy: {
       // Tự động chuyển tiếp mọi request /api sang Backend (không cần build)
       '/api': {
-        target: 'http://localhost:5500',
+        target: 'http://localhost:3000',
         changeOrigin: true
       }
     }
