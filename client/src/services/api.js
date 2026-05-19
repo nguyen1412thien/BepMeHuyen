@@ -1,18 +1,13 @@
-// Tự động nhận diện URL máy chủ Backend thích ứng môi trường Local và Production
-const getApiBaseUrl = () => {
-  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-    return '/api';
-  }
-  return 'http://localhost:3000/api';
-};
-
-const API_BASE_URL = getApiBaseUrl();
+// Dùng đường dẫn tương đối /api:
+// - Khi dev local: Vite proxy tự chuyển tiếp sang backend (không cần build)
+// - Khi production: Express server phục vụ trực tiếp
+const API_BASE_URL = '/api';
 
 /**
  * Hàm hỗ trợ gửi request kèm hoặc không kèm token bảo mật
  */
 async function apiRequest(endpoint, options = {}) {
-  const token = localStorage.getItem('auth_token');
+  const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
   
   const headers = {
     'Content-Type': 'application/json',
