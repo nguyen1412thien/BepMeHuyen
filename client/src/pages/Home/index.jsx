@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../services/api';
-import AddressSelector from '../components/AddressSelector';
-import AlertModal from '../components/AlertModal';
-import './Home.css';
+import { api } from '../../services/api';
+import AddressSelector from '../../components/AddressSelector';
+import AlertModal from '../../components/AlertModal';
+import './style.css';
 
 const Home = ({ user }) => {
   // Custom Alert State

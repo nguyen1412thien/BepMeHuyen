@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../services/api';
-import './Diagnostics.css';
+import { api } from '../../services/api';
+import './style.css';
 
 const Diagnostics = () => {
   // --- STATE MANAGEMENT ---

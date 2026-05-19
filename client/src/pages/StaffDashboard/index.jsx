@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { api } from '../services/api';
-import AlertModal from '../components/AlertModal';
-import AccountsManager from '../components/AccountsManager';
-import './StaffDashboard.css';
+import { api } from '../../services/api';
+import AlertModal from '../../components/AlertModal';
+import AccountsManager from '../../components/AccountsManager';
+import './style.css';
 
 const StaffDashboard = ({ user }) => {
   const [activeTab, setActiveTab] = useState('orders');

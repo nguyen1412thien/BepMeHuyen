@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { api } from '../services/api';
-import './Navbar.css';
+import { api } from '../../services/api';
+import './style.css';
 
 const Navbar = ({ user, onLogout }) => {
   const navigate = useNavigate();

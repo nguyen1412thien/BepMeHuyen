@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../services/api';
-import AlertModal from './AlertModal';
-import './AddressSelector.css';
+import { api } from '../../services/api';
+import AlertModal from '../AlertModal';
+import './style.css';
 
 const AddressSelector = ({ user, onAddressSelect, selectedAddressId }) => {
   // Custom Alert State
