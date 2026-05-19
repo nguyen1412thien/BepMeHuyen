@@ -1,0 +1,16 @@
+# Thư mục thư viện NodeJS (Nên bỏ qua vì rất nặng)
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# File cấu hình môi trường bảo mật (Bắt buộc bỏ qua để bảo mật khóa API & mật khẩu)
+.env
+server/.env
+
+# Tệp tin tạm thời và tệp hệ điều hành
+.DS_Store
+Thumbs.db
+
+# Thư mục biên dịch tĩnh
+dist/
+client/dist/
