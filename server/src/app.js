@@ -124,9 +124,9 @@ app.get('/api/menu', async (req, res) => {
   }
 });
 
-// B. API Đặt món mới (Resilient Graceful Fallback)
+// B. API Đặt món mới (Resilient Graceful Fallback - Phục vụ cả Khách vãng lai & Thành viên)
 app.post('/api/orders', async (req, res) => {
-  const { customer_name, customer_phone, customer_address, notes, items, total_amount } = req.body;
+  const { user_id, customer_name, customer_phone, customer_address, notes, items, total_amount } = req.body;
 
   if (!customer_name || !customer_phone || !customer_address || !items || !items.length) {
     return res.status(400).json({ error: 'Thiếu thông tin đặt hàng cần thiết.' });
@@ -146,8 +146,8 @@ app.post('/api/orders', async (req, res) => {
     await conn.beginTransaction();
 
     const [orderResult] = await conn.query(
-      'INSERT INTO orders (customer_name, customer_phone, customer_address, notes, total_amount) VALUES (?, ?, ?, ?, ?)',
-      [customer_name, customer_phone, customer_address, notes || '', total_amount]
+      'INSERT INTO orders (user_id, customer_name, customer_phone, customer_address, notes, total_amount) VALUES (?, ?, ?, ?, ?, ?)',
+      [user_id || null, customer_name, customer_phone, customer_address, notes || '', total_amount]
     );
     const orderId = orderResult.insertId;
 
@@ -229,14 +229,103 @@ app.get('/api/diagnostics', authMiddleware, adminMiddleware, async (req, res) =>
 // D. API Tạo bảng nhanh (Phòng vệ an toàn - Bảo mật: Chỉ dành cho Admin)
 app.post('/api/diagnostics/create-table', authMiddleware, adminMiddleware, async (req, res) => {
   const { tableName } = req.body;
-  if (!tableName) return res.status(400).json({ success: false, error: 'Thiếu tên bảng cần tạo.' });
-
-  const cleanName = tableName.replace(/[^a-zA-Z0-9_]/g, '');
-  if (!cleanName) return res.status(400).json({ success: false, error: 'Tên bảng chứa ký tự không hợp lệ.' });
 
   try {
+    // Nếu KHÔNG có tableName cụ thể ➡️ Tự động khởi tạo TOÀN BỘ hệ thống bảng chuẩn
+    if (!tableName) {
+      const queries = [
+        // 1. users
+        `CREATE TABLE IF NOT EXISTS users (
+          id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+          email VARCHAR(255) NOT NULL UNIQUE,
+          password_hash VARCHAR(255) NOT NULL,
+          full_name VARCHAR(255),
+          phone VARCHAR(20),
+          address TEXT,
+          role VARCHAR(50) NOT NULL DEFAULT 'user',
+          is_active TINYINT(1) NOT NULL DEFAULT 1,
+          created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+        
+        // 2. categories
+        `CREATE TABLE IF NOT EXISTS categories (
+          id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+          name VARCHAR(255) NOT NULL UNIQUE,
+          description TEXT,
+          slug VARCHAR(255) NOT NULL UNIQUE,
+          created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+        // 3. menu_items
+        `CREATE TABLE IF NOT EXISTS menu_items (
+          id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+          category_id BIGINT UNSIGNED NOT NULL,
+          name VARCHAR(255) NOT NULL,
+          description TEXT,
+          price DECIMAL(10, 2) NOT NULL,
+          image_url VARCHAR(500),
+          is_available TINYINT(1) NOT NULL DEFAULT 1,
+          created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+        // 4. orders (Cho phép user_id NULL cho Khách vãng lai)
+        `CREATE TABLE IF NOT EXISTS orders (
+          id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+          user_id BIGINT UNSIGNED NULL,
+          customer_name VARCHAR(255) NOT NULL,
+          customer_phone VARCHAR(20) NOT NULL,
+          customer_address TEXT NOT NULL,
+          total_amount DECIMAL(10, 2) NOT NULL,
+          payment_method VARCHAR(50) NOT NULL DEFAULT 'COD',
+          payment_status VARCHAR(50) NOT NULL DEFAULT 'pending',
+          order_status VARCHAR(50) NOT NULL DEFAULT 'pending',
+          notes TEXT,
+          created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+        // 5. order_items
+        `CREATE TABLE IF NOT EXISTS order_items (
+          id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+          order_id BIGINT UNSIGNED NOT NULL,
+          menu_item_id BIGINT UNSIGNED NOT NULL,
+          quantity INT NOT NULL,
+          price DECIMAL(10, 2) NOT NULL,
+          created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+          FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`,
+
+        // 6. reviews
+        `CREATE TABLE IF NOT EXISTS reviews (
+          id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+          user_id BIGINT UNSIGNED NOT NULL,
+          menu_item_id BIGINT UNSIGNED NOT NULL,
+          rating TINYINT UNSIGNED NOT NULL CHECK (rating BETWEEN 1 AND 5),
+          comment TEXT,
+          created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+          FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`
+      ];
+
+      for (const q of queries) {
+        await pool.query(q);
+      }
+      console.log('🔨 [Database] Đã khởi tạo thành công toàn bộ hệ thống bảng CSDL!');
+      return res.json({ success: true, message: 'Đã khởi tạo thành công toàn bộ cấu trúc CSDL!' });
+    }
+
+    // Nếu có tableName cụ thể, khởi tạo bảng đơn lẻ đó
+    const cleanName = tableName.replace(/[^a-zA-Z0-9_]/g, '');
+    if (!cleanName) return res.status(400).json({ success: false, error: 'Tên bảng chứa ký tự không hợp lệ.' });
+
     let sql = '';
-    // Nếu tạo bảng users, định nghĩa theo schema chuẩn bảo mật
     if (cleanName === 'users') {
       sql = `CREATE TABLE IF NOT EXISTS users (
         id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -247,7 +336,6 @@ app.post('/api/diagnostics/create-table', authMiddleware, adminMiddleware, async
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;`;
     } else {
-      // Bảng tự do thông dụng để kiểm tra
       sql = `CREATE TABLE IF NOT EXISTS ${cleanName} (
         id INT AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
@@ -256,7 +344,7 @@ app.post('/api/diagnostics/create-table', authMiddleware, adminMiddleware, async
     }
 
     await pool.query(sql);
-    console.log(`🔨 [Database] Tạo bảng thành công: ${cleanName}`);
+    console.log(`🔨 [Database] Tạo bảng lẻ thành công: ${cleanName}`);
     res.json({ success: true, message: `Bảng '${cleanName}' đã được khởi tạo/kiểm tra thành công!` });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

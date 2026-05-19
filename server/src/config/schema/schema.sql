@@ -1,4 +1,5 @@
 -- Cấu trúc cơ sở dữ liệu hoàn chỉnh - Bếp Mẹ Huyền (Web Bán Đồ Ăn)
+-- Hỗ trợ đầy đủ chức năng thanh toán dạng KHÁCH VÃNG LAI (Không bắt đăng nhập)
 
 -- 1. Bảng Người dùng (users)
 CREATE TABLE IF NOT EXISTS users (
@@ -24,8 +25,8 @@ CREATE TABLE IF NOT EXISTS categories (
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 3. Bảng Món ăn / Sản phẩm (products)
-CREATE TABLE IF NOT EXISTS products (
+-- 3. Bảng Món ăn / Thực đơn (menu_items)
+CREATE TABLE IF NOT EXISTS menu_items (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   category_id BIGINT UNSIGNED NOT NULL,
   name VARCHAR(255) NOT NULL,
@@ -39,42 +40,43 @@ CREATE TABLE IF NOT EXISTS products (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 4. Bảng Đơn hàng (orders)
+-- Cho phép user_id là NULL để phục vụ KHÁCH VÃNG LAI không cần tài khoản
 CREATE TABLE IF NOT EXISTS orders (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  user_id BIGINT UNSIGNED NOT NULL,
-  receiver_name VARCHAR(255) NOT NULL,
-  receiver_phone VARCHAR(20) NOT NULL,
-  delivery_address TEXT NOT NULL,
+  user_id BIGINT UNSIGNED NULL, -- NULL cho khách vãng lai, có ID cho người đã đăng nhập
+  customer_name VARCHAR(255) NOT NULL,
+  customer_phone VARCHAR(20) NOT NULL,
+  customer_address TEXT NOT NULL,
   total_amount DECIMAL(10, 2) NOT NULL,
   payment_method VARCHAR(50) NOT NULL DEFAULT 'COD', -- 'COD', 'MOMO', 'VNPAY', 'BANK'
   payment_status VARCHAR(50) NOT NULL DEFAULT 'pending', -- 'pending', 'paid', 'failed'
   order_status VARCHAR(50) NOT NULL DEFAULT 'pending', -- 'pending', 'confirmed', 'preparing', 'shipping', 'completed', 'cancelled'
-  note TEXT,
+  notes TEXT,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 5. Bảng Chi tiết đơn hàng (order_items)
 CREATE TABLE IF NOT EXISTS order_items (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   order_id BIGINT UNSIGNED NOT NULL,
-  product_id BIGINT UNSIGNED NOT NULL,
+  menu_item_id BIGINT UNSIGNED NOT NULL,
   quantity INT NOT NULL,
   price DECIMAL(10, 2) NOT NULL, -- lưu lại giá tại thời điểm mua (để phòng sau này giá món ăn thay đổi)
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-  FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+  FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 6. Bảng Nhận xét & Đánh giá món ăn (reviews)
 CREATE TABLE IF NOT EXISTS reviews (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id BIGINT UNSIGNED NOT NULL,
-  product_id BIGINT UNSIGNED NOT NULL,
+  menu_item_id BIGINT UNSIGNED NOT NULL,
   rating TINYINT UNSIGNED NOT NULL CHECK (rating BETWEEN 1 AND 5), -- từ 1 đến 5 sao
   comment TEXT,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+  FOREIGN KEY (menu_item_id) REFERENCES menu_items(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
