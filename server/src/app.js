@@ -3,6 +3,16 @@ const cors = require('cors');
 const path = require('path');
 const pool = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
+const authMiddleware = require('./middlewares/authMiddleware');
+
+// Middleware phân quyền nâng cao - chỉ cho phép duy nhất ADMIN truy cập
+const adminMiddleware = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({ success: false, error: 'Từ chối truy cập. Chỉ tài khoản Admin mới có quyền chẩn đoán CSDL!' });
+  }
+};
 
 const app = express();
 
@@ -170,18 +180,8 @@ app.post('/api/orders', async (req, res) => {
   }
 });
 
-// B.1. Serve trang giao diện Diagnostics Dashboard
-app.get('/diagnostics', (req, res) => {
-  res.sendFile(path.join(__dirname, 'config/dashboard.html'));
-});
-
-// Hỗ trợ đường dẫn tương thích ngược mà bạn vừa truy cập
-app.get('/server/src/config/dashboard.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'config/dashboard.html'));
-});
-
-// C. API kiểm tra chẩn đoán kết nối CSDL (Được dùng bởi màn hình Diagnostics React)
-app.get('/api/diagnostics', async (req, res) => {
+// C. API kiểm tra chẩn đoán kết nối CSDL (Bảo mật: Chỉ dành cho Admin)
+app.get('/api/diagnostics', authMiddleware, adminMiddleware, async (req, res) => {
   const host = pool.pool?.config?.connectionConfig?.host || process.env.DB_HOST || '136.110.9.77';
   const port = pool.pool?.config?.connectionConfig?.port || process.env.DB_PORT || 3306;
   const database = pool.pool?.config?.connectionConfig?.database || process.env.DB_NAME || 'bepmehuyen';
@@ -226,8 +226,8 @@ app.get('/api/diagnostics', async (req, res) => {
   }
 });
 
-// D. API Tạo bảng nhanh (Phòng vệ an toàn)
-app.post('/api/diagnostics/create-table', async (req, res) => {
+// D. API Tạo bảng nhanh (Phòng vệ an toàn - Bảo mật: Chỉ dành cho Admin)
+app.post('/api/diagnostics/create-table', authMiddleware, adminMiddleware, async (req, res) => {
   const { tableName } = req.body;
   if (!tableName) return res.status(400).json({ success: false, error: 'Thiếu tên bảng cần tạo.' });
 
@@ -263,8 +263,8 @@ app.post('/api/diagnostics/create-table', async (req, res) => {
   }
 });
 
-// E. API Thêm dữ liệu mẫu nhanh (Dữ liệu tự động hash mật khẩu nếu là users)
-app.post('/api/diagnostics/insert-data', async (req, res) => {
+// E. API Thêm dữ liệu mẫu nhanh (Dữ liệu tự động hash mật khẩu - Bảo mật: Chỉ dành cho Admin)
+app.post('/api/diagnostics/insert-data', authMiddleware, adminMiddleware, async (req, res) => {
   const { tableName, record } = req.body;
   if (!tableName) return res.status(400).json({ success: false, error: 'Thiếu tên bảng cần thêm dữ liệu.' });
 
@@ -295,8 +295,8 @@ app.post('/api/diagnostics/insert-data', async (req, res) => {
   }
 });
 
-// F. API Lấy dòng dữ liệu xem nhanh
-app.get('/api/diagnostics/table-rows/:tableName', async (req, res) => {
+// F. API Lấy dòng dữ liệu xem nhanh (Bảo mật: Chỉ dành cho Admin)
+app.get('/api/diagnostics/table-rows/:tableName', authMiddleware, adminMiddleware, async (req, res) => {
   const { tableName } = req.params;
   const cleanName = tableName.replace(/[^a-zA-Z0-9_]/g, '');
 
@@ -308,8 +308,8 @@ app.get('/api/diagnostics/table-rows/:tableName', async (req, res) => {
   }
 });
 
-// G. API Xóa dòng dữ liệu mẫu theo ID
-app.delete('/api/diagnostics/delete-row/:tableName/:id', async (req, res) => {
+// G. API Xóa dòng dữ liệu mẫu theo ID (Bảo mật: Chỉ dành cho Admin)
+app.delete('/api/diagnostics/delete-row/:tableName/:id', authMiddleware, adminMiddleware, async (req, res) => {
   const { tableName, id } = req.params;
   const cleanName = tableName.replace(/[^a-zA-Z0-9_]/g, '');
   const cleanId = parseInt(id, 10);
@@ -331,13 +331,14 @@ app.delete('/api/diagnostics/delete-row/:tableName/:id', async (req, res) => {
   }
 });
 
-// H. API Chỉnh sửa đơn lẻ từng cột (Cell inline update)
-app.patch('/api/diagnostics/update-cell/:tableName/:id', async (req, res) => {
+// H. API Chỉnh sửa đơn lẻ từng cột (Cell inline update - Hỗ trợ cả POST và field/column - Bảo mật: Chỉ dành cho Admin)
+app.post('/api/diagnostics/update-cell/:tableName/:id', authMiddleware, adminMiddleware, async (req, res) => {
   const { tableName, id } = req.params;
-  const { column, value } = req.body;
+  const { column, field, value } = req.body;
+  const targetColumn = column || field;
 
   const cleanTableName = tableName.replace(/[^a-zA-Z0-9_]/g, '');
-  const cleanColumnName = column.replace(/[^a-zA-Z0-9_]/g, '');
+  const cleanColumnName = targetColumn ? targetColumn.replace(/[^a-zA-Z0-9_]/g, '') : '';
   const cleanId = parseInt(id, 10);
 
   if (isNaN(cleanId)) {
@@ -369,8 +370,8 @@ app.patch('/api/diagnostics/update-cell/:tableName/:id', async (req, res) => {
   }
 });
 
-// I. API Lấy dữ liệu cấu trúc ERD thực tế (Bảng, Cột, Khóa ngoại)
-app.get('/api/diagnostics/erd', async (req, res) => {
+// I. API Lấy dữ liệu cấu trúc ERD thực tế (Bảng, Cột, Khóa ngoại - Bảo mật: Chỉ dành cho Admin)
+app.get('/api/diagnostics/erd', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const [dbNameRows] = await pool.query('SELECT DATABASE() AS dbName');
     const dbName = dbNameRows[0]?.dbName || 'bepmehuyen';
@@ -410,8 +411,8 @@ app.get('/api/diagnostics/erd', async (req, res) => {
 
 // Phục vụ trang chủ React SPA cho tất cả các đường dẫn Router khác
 app.get('*', (req, res, next) => {
-  // Bỏ qua các đường dẫn API và diagnostics
-  if (req.path.startsWith('/api') || req.path.startsWith('/diagnostics') || req.path.startsWith('/server/src/config/dashboard.html')) {
+  // Bỏ qua các đường dẫn API
+  if (req.path.startsWith('/api')) {
     return next();
   }
   res.sendFile(path.join(__dirname, '../public/index.html'));

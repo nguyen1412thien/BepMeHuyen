@@ -73,7 +73,10 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/auth" element={<Auth onLoginSuccess={handleLoginSuccess} />} />
-        <Route path="/database" element={<Diagnostics />} />
+        <Route 
+          path="/database" 
+          element={user && user.role === 'admin' ? <Diagnostics /> : <Home />} 
+        />
       </Routes>
     </Router>
   );

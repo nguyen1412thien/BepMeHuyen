@@ -25,9 +25,11 @@ const Navbar = ({ user, onLogout }) => {
             <i className="fa-solid fa-house"></i> Trang Chủ
           </Link>
           
-          <Link to="/database" className={`nav-link ${isActive('/database') ? 'active' : ''}`}>
-            <i className="fa-solid fa-database"></i> Chẩn Đoán CSDL
-          </Link>
+          {user && user.role === 'admin' && (
+            <Link to="/database" className={`nav-link ${isActive('/database') ? 'active' : ''}`}>
+              <i className="fa-solid fa-database"></i> Chẩn Đoán CSDL
+            </Link>
+          )}
 
           {user ? (
             <div className="user-profile-menu">
