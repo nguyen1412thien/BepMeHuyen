@@ -36,9 +36,12 @@ const AccountsManager = ({ showAlert }) => {
     password: '',
     full_name: '',
     phone: '',
+    avatar_url: '',
     role: 'user',
     is_active: true
   });
+
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   const loadUsers = async () => {
     setLoading(true);
@@ -82,6 +85,7 @@ const AccountsManager = ({ showAlert }) => {
         password: '',
         full_name: user.full_name || '',
         phone: user.phone || '',
+        avatar_url: user.avatar_url || '',
         role: user.role,
         is_active: user.is_active === 1
       });
@@ -92,6 +96,7 @@ const AccountsManager = ({ showAlert }) => {
         password: '',
         full_name: '',
         phone: '',
+        avatar_url: '',
         role: 'user',
         is_active: true
       });
@@ -110,6 +115,30 @@ const AccountsManager = ({ showAlert }) => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
+  };
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setUploadingAvatar(true);
+    try {
+      const formPayload = new FormData();
+      formPayload.append('avatar', file);
+      
+      const result = await api.uploadUserAvatar(formPayload);
+      if (result.success) {
+        setFormData(prev => ({ ...prev, avatar_url: result.imageUrl }));
+        if (showAlert) showAlert('Tải ảnh đại diện lên thành công!', 'success');
+      } else {
+        if (showAlert) showAlert(result.error || 'Tải ảnh thất bại!', 'error');
+      }
+    } catch (err) {
+      console.error('Error uploading file:', err);
+      if (showAlert) showAlert('Lỗi khi tải ảnh lên: ' + err.message, 'error');
+    } finally {
+      setUploadingAvatar(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -207,6 +236,7 @@ const AccountsManager = ({ showAlert }) => {
             <thead>
               <tr>
                 <th>ID</th>
+                <th>Ảnh</th>
                 <th>Email</th>
                 <th>Họ Tên</th>
                 <th>SĐT</th>
@@ -219,6 +249,13 @@ const AccountsManager = ({ showAlert }) => {
               {users.map((u) => (
                 <tr key={u.id}>
                   <td>{u.id}</td>
+                  <td>
+                    {u.avatar_url ? (
+                      <img src={u.avatar_url} alt="Avatar" className="user-avatar-sm" />
+                    ) : (
+                      <div className="user-avatar-placeholder"><i className="fa-solid fa-user"></i></div>
+                    )}
+                  </td>
                   <td>{u.email}</td>
                   <td>{u.full_name || '-'}</td>
                   <td>{u.phone || '-'}</td>
@@ -279,6 +316,28 @@ const AccountsManager = ({ showAlert }) => {
               </button>
             </div>
             <form onSubmit={handleSubmit} className="account-form">
+              <div className="form-group avatar-upload-group">
+                <label>Ảnh Đại Diện</label>
+                <div className="avatar-preview-container">
+                  {formData.avatar_url ? (
+                    <img src={formData.avatar_url} alt="Avatar Preview" className="avatar-preview" />
+                  ) : (
+                    <div className="avatar-preview-placeholder">
+                      <i className="fa-solid fa-cloud-arrow-up"></i>
+                      <span>Chọn ảnh</span>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="avatar-file-input"
+                    disabled={uploadingAvatar}
+                  />
+                  {uploadingAvatar && <div className="avatar-upload-overlay"><i className="fa-solid fa-spinner fa-spin"></i></div>}
+                </div>
+              </div>
+
               <div className="form-group">
                 <label>Email <span className="text-danger">*</span></label>
                 <input

@@ -42,7 +42,7 @@ class UserController {
    */
   static async createUser(req, res) {
     try {
-      const { email, password, full_name, phone, role, is_active } = req.body;
+      const { email, password, full_name, phone, avatar_url, role, is_active } = req.body;
       
       if (!email || !password) {
         return res.status(400).json({ success: false, error: 'Email và mật khẩu là bắt buộc' });
@@ -61,6 +61,7 @@ class UserController {
         password_hash, 
         full_name, 
         phone,
+        avatar_url,
         role: role || 'user',
         is_active: is_active !== undefined ? is_active : 1
       });
@@ -78,14 +79,14 @@ class UserController {
   static async updateUser(req, res) {
     try {
       const id = req.params.id;
-      const { full_name, phone, role, is_active, password } = req.body;
+      const { full_name, phone, avatar_url, role, is_active, password } = req.body;
       
       const user = await UserModel.findById(id);
       if (!user) {
         return res.status(404).json({ success: false, error: 'Không tìm thấy người dùng' });
       }
 
-      const updateData = { full_name, phone, role, is_active };
+      const updateData = { full_name, phone, avatar_url, role, is_active };
 
       if (password) {
         const saltRounds = 10;

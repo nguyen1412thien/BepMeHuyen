@@ -40,6 +40,13 @@ Tài liệu này tổng hợp toàn bộ các tính năng, thay đổi và tối
 - **Backend**: Bổ sung object `filters` vào `findAll` và `countAll` trong `userModel.js`. Cho phép truy vấn linh hoạt bằng mệnh đề `LIKE` cho các trường `email`, `full_name`, `phone` và khớp chính xác (`=`) cho `role`, `status`. Controller tự động trích xuất các tham số này từ `req.query`.
 - **Frontend**: Bổ sung thanh công cụ tìm kiếm và lọc (`AccountsManager/index.jsx`). Sử dụng tính năng `debounce` (kỹ thuật trì hoãn 500ms sau khi người dùng ngừng gõ) để tối ưu hóa việc gọi API, giảm tải cho Server. Khi có bất kỳ thay đổi nào về bộ lọc, giao diện tự động reset về trang 1.
 
+### 1.6. Upload Ảnh Đại Diện (Avatar)
+- **Database**: Sử dụng Script `ALTER TABLE` thêm trường `avatar_url` vào bảng `users`. Update các hàm trong `userModel.js` (`findById`, `findAll`, `createAdmin`, `update`) để hỗ trợ trường này.
+- **Backend API**: Bổ sung endpoint POST `/api/users/upload-avatar` tại `userRoutes.js` bằng thư viện `multer`. Hệ thống kiểm soát việc lưu trữ file vào thư mục `/public/uploads` với định dạng tên `avatar-<timestamp>.<ext>` và giới hạn dung lượng là 5MB.
+- **Frontend**:
+  - Giao diện dạng tròn thay thế ảnh đại diện, có icon upload thay thế trực quan khi chưa có ảnh.
+  - Sử dụng hàm gọi API `uploadUserAvatar` để tải ảnh lên máy chủ, nhận lại `imageUrl` ngay lập tức và render trực tiếp trong Form. Bảng người dùng ở Dashboard cũng tự động thu nhỏ và hiển thị Avatar của từng người.
+
 ---
 
 ## 2. Chuẩn Hóa Cấu Trúc Dự Án (Refactoring)

@@ -19,7 +19,7 @@ class UserModel {
    */
   static async findById(id) {
     const [rows] = await db.query(
-      'SELECT id, email, full_name, phone, role, is_active, created_at, updated_at FROM users WHERE id = ?', 
+      'SELECT id, email, full_name, phone, avatar_url, role, is_active, created_at, updated_at FROM users WHERE id = ?', 
       [id]
     );
     if (rows.length === 0) return null;
@@ -34,7 +34,7 @@ class UserModel {
    * @returns {Promise<Array>}
    */
   static async findAll(limit = 10, offset = 0, filters = {}) {
-    let query = 'SELECT id, email, full_name, phone, role, is_active, created_at, updated_at FROM users';
+    let query = 'SELECT id, email, full_name, phone, avatar_url, role, is_active, created_at, updated_at FROM users';
     const queryParams = [];
     const whereConditions = [];
 
@@ -122,10 +122,10 @@ class UserModel {
   /**
    * Admin tạo người dùng mới
    */
-  static async createAdmin({ email, password_hash, full_name, phone, role = 'user', is_active = 1 }) {
+  static async createAdmin({ email, password_hash, full_name, phone, avatar_url, role = 'user', is_active = 1 }) {
     const [result] = await db.query(
-      'INSERT INTO users (email, password_hash, full_name, phone, role, is_active) VALUES (?, ?, ?, ?, ?, ?)',
-      [email, password_hash, full_name || null, phone || null, role, is_active]
+      'INSERT INTO users (email, password_hash, full_name, phone, avatar_url, role, is_active) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [email, password_hash, full_name || null, phone || null, avatar_url || null, role, is_active]
     );
     
     return {
@@ -133,6 +133,7 @@ class UserModel {
       email,
       full_name,
       phone,
+      avatar_url,
       role,
       is_active
     };
@@ -154,6 +155,10 @@ class UserModel {
     if (updateData.phone !== undefined) {
       fields.push('phone = ?');
       values.push(updateData.phone);
+    }
+    if (updateData.avatar_url !== undefined) {
+      fields.push('avatar_url = ?');
+      values.push(updateData.avatar_url);
     }
     if (updateData.role !== undefined) {
       fields.push('role = ?');

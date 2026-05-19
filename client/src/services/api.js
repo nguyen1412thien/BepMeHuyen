@@ -295,4 +295,12 @@ export const api = {
   deleteUser: (id) => apiRequest(`/users/${id}`, {
     method: 'DELETE'
   }),
+
+  /**
+   * Upload ảnh đại diện (Admin)
+   */
+  uploadUserAvatar: (formData) => apiRequest('/users/upload-avatar', {
+    method: 'POST',
+    body: formData
+  }),
 };
