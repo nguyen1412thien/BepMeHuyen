@@ -14,7 +14,7 @@ RUN npm ci --only=production
 COPY server/ ./
 
 # Mở cổng API backend (mặc định cổng 3000)
-EXPOSE 3000
+EXPOSE 8080
 
 # Khởi chạy ứng dụng backend qua src/server.js
 CMD [ "node", "src/server.js" ]
