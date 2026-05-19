@@ -2,9 +2,6 @@
 server/node_modules
 client/node_modules
 
-# Bỏ qua thư mục code frontend client (vì Dockerfile này chỉ phục vụ dựng backend app)
-client
-
 # Bỏ qua các file rác hệ thống và cấu hình local
 .git
 .gitignore
