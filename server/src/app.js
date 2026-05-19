@@ -10,6 +10,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, '../public')));
 
 // 2. Gắn kết các cổng API Phân quyền
 app.use('/api/auth', authRoutes);
@@ -405,6 +406,15 @@ app.get('/api/diagnostics/erd', async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
+});
+
+// Phục vụ trang chủ React SPA cho tất cả các đường dẫn Router khác
+app.get('*', (req, res, next) => {
+  // Bỏ qua các đường dẫn API và diagnostics
+  if (req.path.startsWith('/api') || req.path.startsWith('/diagnostics') || req.path.startsWith('/server/src/config/dashboard.html')) {
+    return next();
+  }
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 module.exports = app;
