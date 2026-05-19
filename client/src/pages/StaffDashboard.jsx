@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api';
 import AlertModal from '../components/AlertModal';
+import AccountsManager from '../components/AccountsManager';
 import './StaffDashboard.css';
 
 const StaffDashboard = ({ user }) => {
@@ -413,14 +414,21 @@ const StaffDashboard = ({ user }) => {
           </button>
 
           {user?.role === 'admin' ? (
-            <button 
-              className={`dashboard-tab-btn ${activeTab === 'kitchens' ? 'active' : ''}`}
-              onClick={() => { setActiveTab('kitchens'); setSelectedManageKitchen(null); }}
-            >
-              <i className="fa-solid fa-store"></i> Quản Lý Chi Nhánh & Thực Đơn
-            </button>
-          ) : (
             <>
+              <button
+                className={`dashboard-tab-btn ${activeTab === 'kitchens' ? 'active' : ''}`}
+                onClick={() => { setActiveTab('kitchens'); setSelectedManageKitchen(null); }}
+              >
+                <i className="fa-solid fa-store"></i> Quản Lý Chi Nhánh & Thực Đơn
+              </button>
+              <button
+                className={`dashboard-tab-btn ${activeTab === 'accounts' ? 'active' : ''}`}
+                onClick={() => setActiveTab('accounts')}
+              >
+                <i className="fa-solid fa-users"></i> Quản Lý Tài Khoản
+              </button>
+            </>
+          ) : (            <>
               <button 
                 className={`dashboard-tab-btn ${activeTab === 'menu' ? 'active' : ''}`}
                 onClick={() => setActiveTab('menu')}
@@ -446,7 +454,7 @@ const StaffDashboard = ({ user }) => {
               <div className="panel-header">
                 <h2>Danh Sách Đơn Hàng</h2>
                 <div className="status-filters">
-                  {['all', 'pending', 'confirmed', 'preparing', 'shipping', 'completed', 'cancelled'].map(status => (
+                  {['all', 'pending', 'confirmed', 'shipping', 'completed', 'cancelled'].map(status => (
                     <button
                       key={status}
                       className={`filter-btn ${orderFilter === status ? 'active' : ''}`}
@@ -466,122 +474,78 @@ const StaffDashboard = ({ user }) => {
               ) : orders.length === 0 ? (
                 <p className="text-center py-5">Không tìm thấy đơn hàng nào ở trạng thái này.</p>
               ) : (
-                <div className="table-responsive">
-                  <table className="dashboard-table">
-                    <thead>
-                      <tr>
-                        <th>Mã Đơn</th>
-                        <th>Khách Hàng</th>
-                        <th>Thông Tin Món</th>
-                        <th>Giao Tới / Phí Ship</th>
-                        <th>Phục Vụ Từ Bếp</th>
-                        <th>Trạng Thái</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {orders.map(order => (
-                        <tr key={order.id}>
-                          <td><strong>#{order.id}</strong></td>
-                          <td>
-                            <div>{order.receiver_name}</div>
-                            <small className="text-secondary">{order.receiver_phone}</small>
-                          </td>
-                          <td>
-                            <div className="order-items-summary">
-                              {order.items?.map(it => (
-                                <div key={it.id}>
-                                  <small>• x{it.quantity} {it.name}</small>
-                                </div>
-                              ))}
-                              <strong>{parseFloat(order.total_amount).toLocaleString('vi-VN')} đ</strong>
+                <div className="items-grid">
+                  {orders.map(order => (
+                    <div key={order.id} className="dashboard-item-card order-panel-card">
+                      <div className="order-panel-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                        <div className="order-id" style={{ fontSize: '1.1rem', color: 'var(--text-primary)' }}>Mã Đơn: <strong>#{order.id}</strong></div>
+                        <span className={`order-badge badge-${order.order_status}`}>
+                          {getOrderStatusText(order.order_status)}
+                        </span>
+                      </div>
+                      <div className="item-card-details">
+                        <h4>{order.receiver_name}</h4>
+                        <p>{order.receiver_phone}</p>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div className="item-card-meta">
+                          <span>Giao tới:</span>
+                          <strong style={{ textAlign: 'right', maxWidth: '60%' }}>{order.delivery_address}</strong>
+                        </div>
+                        {order.shipping_fee > 0 && (
+                          <div className="item-card-meta mt-1">
+                            <span>Phí ship:</span>
+                            <strong>{parseFloat(order.shipping_fee).toLocaleString('vi-VN')} đ</strong>
+                          </div>
+                        )}
+                        <div className="item-card-meta mt-1">
+                          <span>Bếp phục vụ:</span>
+                          <strong className="text-primary">{order.kitchen_name || 'Bếp trung tâm'}</strong>
+                        </div>
+                        <div className="order-items-summary mt-3" style={{ background: 'rgba(255,255,255,0.02)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                          {order.items?.map(it => (
+                            <div key={it.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '6px' }}>
+                              <span style={{ color: 'var(--text-primary)' }}>{it.quantity}x {it.name}</span>
                             </div>
-                          </td>
-                          <td>
-                            <div style={{ maxWidth: '250px', fontSize: '0.85rem' }}>{order.delivery_address}</div>
-                            {order.shipping_fee > 0 && (
-                              <small className="text-secondary">🚚 Phí ship: {parseFloat(order.shipping_fee).toLocaleString('vi-VN')} đ</small>
-                            )}
-                          </td>
-                          <td>
-                            <small className="text-primary">{order.kitchen_name || 'Bếp trung tâm'}</small>
-                          </td>
-                          <td>
-                            {order.order_status === 'pending' && (
-                              <div className="order-actions-cell" style={{ display: 'flex', gap: '8px' }}>
-                                <button 
-                                  className="btn btn-success btn-sm" 
-                                  onClick={() => handleStatusChange(order.id, 'confirmed')}
-                                  style={{ padding: '6px 12px', fontSize: '0.85rem' }}
-                                >
-                                  <i className="fa-solid fa-check"></i> Nhận đơn
-                                </button>
-                                <button 
-                                  className="btn btn-danger-outline btn-sm" 
-                                  onClick={() => handleCancelOrder(order.id)}
-                                  style={{ padding: '6px 12px', fontSize: '0.85rem' }}
-                                >
-                                  <i className="fa-solid fa-xmark"></i> Hủy
-                                </button>
-                              </div>
-                            )}
-                            {order.order_status === 'confirmed' && (
-                              <div className="order-actions-cell" style={{ display: 'flex', gap: '8px' }}>
-                                <button 
-                                  className="btn btn-warning btn-sm" 
-                                  onClick={() => handleStatusChange(order.id, 'shipping')}
-                                  style={{ padding: '6px 12px', fontSize: '0.85rem', color: '#fff' }}
-                                >
-                                  <i className="fa-solid fa-truck"></i> Giao hàng
-                                </button>
-                                <button 
-                                  className="btn btn-danger-outline btn-sm" 
-                                  onClick={() => handleCancelOrder(order.id)}
-                                  style={{ padding: '6px 12px', fontSize: '0.85rem' }}
-                                >
-                                  <i className="fa-solid fa-xmark"></i> Hủy
-                                </button>
-                              </div>
-                            )}
-                            {order.order_status === 'shipping' && (
-                              <div className="order-actions-cell" style={{ display: 'flex', gap: '8px' }}>
-                                <button 
-                                  className="btn btn-success btn-sm" 
-                                  onClick={() => handleStatusChange(order.id, 'completed')}
-                                  style={{ padding: '6px 12px', fontSize: '0.85rem' }}
-                                >
-                                  <i className="fa-solid fa-circle-check"></i> Hoàn thành
-                                </button>
-                                <button 
-                                  className="btn btn-danger-outline btn-sm" 
-                                  onClick={() => handleCancelOrder(order.id)}
-                                  style={{ padding: '6px 12px', fontSize: '0.85rem' }}
-                                >
-                                  <i className="fa-solid fa-xmark"></i> Hủy
-                                </button>
-                              </div>
-                            )}
-                            {order.order_status === 'completed' && (
-                              <span className="order-badge badge-completed">
-                                <i className="fa-solid fa-check-double"></i> Hoàn thành
-                              </span>
-                            )}
-                            {order.order_status === 'cancelled' && (
-                              <div className="cancelled-status-info">
-                                <span className="order-badge badge-cancelled">
-                                  <i className="fa-solid fa-ban"></i> Đã hủy
-                                </span>
-                                {order.cancel_reason && (
-                                  <div className="cancel-reason-text" style={{ fontSize: '0.75rem', color: '#ff7675', marginTop: '4px', maxWidth: '150px', wordBreak: 'break-word' }}>
-                                    Lý do: {order.cancel_reason}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                          ))}
+                          <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: '8px', paddingTop: '8px' }}>
+                            <strong style={{ color: 'var(--text-secondary)' }}>Tổng cộng:</strong>
+                            <strong className="text-primary">{parseFloat(order.total_amount).toLocaleString('vi-VN')} đ</strong>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="item-card-actions mt-3">
+                        {order.order_status === 'pending' && (
+                          <>
+                            <button className="btn btn-success btn-sm flex-1" onClick={() => handleStatusChange(order.id, 'confirmed')}><i className="fa-solid fa-check"></i> Nhận đơn</button>
+                            <button className="btn btn-danger-outline btn-sm flex-1" onClick={() => handleCancelOrder(order.id)}><i className="fa-solid fa-xmark"></i> Hủy</button>
+                          </>
+                        )}
+                        {order.order_status === 'confirmed' && (
+                          <>
+                            <button className="btn btn-warning btn-sm flex-1" onClick={() => handleStatusChange(order.id, 'shipping')} style={{color:'#fff'}}><i className="fa-solid fa-truck"></i> Giao hàng</button>
+                            <button className="btn btn-danger-outline btn-sm flex-1" onClick={() => handleCancelOrder(order.id)}><i className="fa-solid fa-xmark"></i> Hủy</button>
+                          </>
+                        )}
+                        {order.order_status === 'shipping' && (
+                          <>
+                            <button className="btn btn-success btn-sm flex-1" onClick={() => handleStatusChange(order.id, 'completed')}><i className="fa-solid fa-circle-check"></i> Hoàn thành</button>
+                            <button className="btn btn-danger-outline btn-sm flex-1" onClick={() => handleCancelOrder(order.id)}><i className="fa-solid fa-xmark"></i> Hủy</button>
+                          </>
+                        )}
+                        {order.order_status === 'cancelled' && order.cancel_reason && (
+                          <div className="cancel-reason-text" style={{ fontSize: '0.8rem', color: '#ff7675', width: '100%', textAlign: 'center', background: 'rgba(231,76,60,0.1)', padding: '6px', borderRadius: '6px' }}>
+                            Lý do hủy: {order.cancel_reason}
+                          </div>
+                        )}
+                        {order.order_status === 'completed' && (
+                          <div style={{ width: '100%', textAlign: 'center', color: 'var(--success)' }}>
+                            <i className="fa-solid fa-check-double"></i> Giao hàng thành công
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -805,6 +769,11 @@ const StaffDashboard = ({ user }) => {
                 </div>
               )}
             </div>
+          )}
+
+          {/* TAB 4: ACCOUNTS (ADMIN ONLY) */}
+          {activeTab === 'accounts' && user?.role === 'admin' && (
+            <AccountsManager showAlert={showAlert} />
           )}
 
         </main>

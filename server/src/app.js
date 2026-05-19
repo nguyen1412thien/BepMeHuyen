@@ -18,6 +18,7 @@ const menuRoutes = require('./routes/menuRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const kitchenRoutes = require('./routes/kitchenRoutes');
 const addressRoutes = require('./routes/addressRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 // 2. Gắn kết các cổng API Phân quyền
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/kitchens', kitchenRoutes);

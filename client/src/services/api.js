@@ -261,4 +261,32 @@ export const api = {
     method: 'POST'
   }),
 
+  // --- QUẢN LÝ NGƯỜI DÙNG (ADMIN) ---
+  /**
+   * Lấy danh sách người dùng
+   */
+  getAllUsers: () => apiRequest('/users').then(res => res.data || []),
+
+  /**
+   * Tạo người dùng mới
+   */
+  createUser: (data) => apiRequest('/users', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+
+  /**
+   * Cập nhật thông tin người dùng
+   */
+  updateUser: (id, data) => apiRequest(`/users/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }),
+
+  /**
+   * Xóa người dùng
+   */
+  deleteUser: (id) => apiRequest(`/users/${id}`, {
+    method: 'DELETE'
+  }),
 };
