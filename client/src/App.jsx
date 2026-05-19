@@ -13,7 +13,8 @@ const App = () => {
   // Kiểm tra token và khôi phục phiên đăng nhập khi khởi động ứng dụng
   useEffect(() => {
     const restoreSession = async () => {
-      const token = localStorage.getItem('auth_token');
+      // Đọc token từ localStorage (ghi nhớ lâu dài) hoặc sessionStorage (trong phiên làm việc hiện tại)
+      const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
       if (token) {
         try {
           const profile = await api.getProfile();
@@ -22,6 +23,7 @@ const App = () => {
         } catch (err) {
           console.warn('⚠️ Token hết hạn hoặc không hợp lệ. Đang xóa phiên đăng nhập cũ.');
           localStorage.removeItem('auth_token');
+          sessionStorage.removeItem('auth_token');
         }
       }
       setInitializing(false);
@@ -36,6 +38,7 @@ const App = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
+    sessionStorage.removeItem('auth_token');
     setUser(null);
     console.log('🔒 Đã đăng xuất khỏi hệ thống.');
   };
