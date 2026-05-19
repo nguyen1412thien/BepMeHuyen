@@ -263,9 +263,11 @@ export const api = {
 
   // --- QUẢN LÝ NGƯỜI DÙNG (ADMIN) ---
   /**
-   * Lấy danh sách người dùng
+   * Lấy danh sách người dùng (có phân trang)
    */
-  getAllUsers: () => apiRequest('/users').then(res => res.data || []),
+  getAllUsers: (page = 1, limit = 10) => {
+    return apiRequest(`/users?page=${page}&limit=${limit}`).then(res => res);
+  },
 
   /**
    * Tạo người dùng mới

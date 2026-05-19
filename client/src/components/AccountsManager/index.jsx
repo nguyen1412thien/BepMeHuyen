@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
+import Pagination from '../Pagination';
 import './style.css';
 
 const AccountsManager = ({ showAlert }) => {
@@ -7,6 +8,11 @@ const AccountsManager = ({ showAlert }) => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 10;
 
   const [formData, setFormData] = useState({
     email: '',
@@ -20,8 +26,15 @@ const AccountsManager = ({ showAlert }) => {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const data = await api.getAllUsers();
-      setUsers(data);
+      const response = await api.getAllUsers(currentPage, limit);
+      // Giả sử API trả về { success: true, data: [...], pagination: { totalPages, ... } }
+      setUsers(response.data || []);
+      if (response.pagination) {
+        setTotalPages(response.pagination.totalPages);
+      } else {
+        // Fallback for non-paginated API
+        setTotalPages(1);
+      }
     } catch (error) {
       console.error('Lỗi khi tải danh sách người dùng:', error);
       if (showAlert) showAlert('Lỗi khi tải danh sách người dùng', 'error');
@@ -32,7 +45,7 @@ const AccountsManager = ({ showAlert }) => {
 
   useEffect(() => {
     loadUsers();
-  }, []);
+  }, [currentPage]);
 
   const handleOpenModal = (user = null) => {
     if (user) {
@@ -188,6 +201,14 @@ const AccountsManager = ({ showAlert }) => {
             </tbody>
           </table>
         </div>
+      )}
+
+      {!loading && totalPages > 1 && (
+        <Pagination 
+          currentPage={currentPage} 
+          totalPages={totalPages} 
+          onPageChange={(page) => setCurrentPage(page)} 
+        />
       )}
 
       {showModal && (

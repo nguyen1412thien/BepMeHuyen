@@ -32,10 +32,13 @@ Tài liệu này tổng hợp toàn bộ các tính năng, thay đổi và tối
 - **Tích Hợp `StaffDashboard`**: 
   - Gắn Tab **Quản Lý Tài Khoản** vào thanh điều hướng bên (Sidebar). Tab này được ẩn đi và chỉ xuất hiện nếu người dùng đang đăng nhập là **Admin**.
 
+### 1.4. Tính Năng Phân Trang (Pagination)
+- **Backend**: Cập nhật `findAll` trong `userModel.js` để nhận tham số `limit` và `offset`. Thêm hàm `countAll` để lấy tổng số lượng bản ghi. Điều chỉnh `getAllUsers` ở `userController.js` để trả về dữ liệu phân trang (bao gồm `total`, `page`, `totalPages`).
+- **Frontend**: Tạo một Component UI dùng chung là `Pagination` (tại `client/src/components/Pagination/index.jsx` và `.css`) và tích hợp nó vào giao diện `AccountsManager`. Component hỗ trợ logic thông minh để giới hạn số trang hiển thị (thêm dấu `...` khi vượt qua giới hạn), ngăn tràn giao diện.
+
 ---
 
 ## 2. Chuẩn Hóa Cấu Trúc Dự Án (Refactoring)
-
 Để đảm bảo khả năng mở rộng (scalability) và dễ dàng bảo trì (maintainability), toàn bộ cấu trúc mã nguồn đã được phân vùng lại theo các tiêu chuẩn chuyên nghiệp.
 
 ### 2.1. Phân Vùng Backend (Server)

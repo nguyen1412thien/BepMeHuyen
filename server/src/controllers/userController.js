@@ -7,8 +7,24 @@ class UserController {
    */
   static async getAllUsers(req, res) {
     try {
-      const users = await UserModel.findAll();
-      res.json({ success: true, data: users });
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const offset = (page - 1) * limit;
+
+      const users = await UserModel.findAll(limit, offset);
+      const total = await UserModel.countAll();
+      const totalPages = Math.ceil(total / limit);
+
+      res.json({ 
+        success: true, 
+        data: users, 
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages
+        }
+      });
     } catch (error) {
       console.error('Lỗi khi lấy danh sách user:', error);
       res.status(500).json({ success: false, error: 'Lỗi server' });

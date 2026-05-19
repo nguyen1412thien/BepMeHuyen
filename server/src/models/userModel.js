@@ -27,14 +27,26 @@ class UserModel {
   }
 
   /**
-   * Lấy danh sách tất cả người dùng
+   * Lấy danh sách tất cả người dùng (hỗ trợ phân trang)
+   * @param {number} limit
+   * @param {number} offset
    * @returns {Promise<Array>}
    */
-  static async findAll() {
+  static async findAll(limit = 10, offset = 0) {
     const [rows] = await db.query(
-      'SELECT id, email, full_name, phone, role, is_active, created_at, updated_at FROM users ORDER BY id DESC'
+      'SELECT id, email, full_name, phone, role, is_active, created_at, updated_at FROM users ORDER BY id DESC LIMIT ? OFFSET ?',
+      [limit, offset]
     );
     return rows;
+  }
+
+  /**
+   * Đếm tổng số lượng người dùng
+   * @returns {Promise<number>}
+   */
+  static async countAll() {
+    const [rows] = await db.query('SELECT COUNT(*) as total FROM users');
+    return rows[0].total;
   }
 
   /**
