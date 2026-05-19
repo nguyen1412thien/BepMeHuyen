@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const pool = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 
@@ -166,6 +167,16 @@ app.post('/api/orders', async (req, res) => {
   } finally {
     conn.release();
   }
+});
+
+// B.1. Serve trang giao diện Diagnostics Dashboard
+app.get('/diagnostics', (req, res) => {
+  res.sendFile(path.join(__dirname, 'config/dashboard.html'));
+});
+
+// Hỗ trợ đường dẫn tương thích ngược mà bạn vừa truy cập
+app.get('/server/src/config/dashboard.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'config/dashboard.html'));
 });
 
 // C. API kiểm tra chẩn đoán kết nối CSDL (Được dùng bởi màn hình Diagnostics React)

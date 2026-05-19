@@ -758,9 +758,18 @@
       }, 5000);
     }
 
-    // Tự động nhận diện host: Nếu mở trên Live Server cổng 5500 sẽ trỏ về backend cổng 3000
+    // Tự động nhận diện host: Đảm bảo tương thích hoàn hảo giữa môi trường local và sản xuất (Google Cloud Run)
     const getBaseUrl = () => {
-      return window.location.port === '3000' ? '' : 'http://localhost:3000';
+      // Nếu truy cập từ môi trường sản xuất đám mây (Cloud Run / tên miền thật)
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        return '';
+      }
+      // Nếu truy cập local qua cổng frontend 5500 (Live Server)
+      if (window.location.port !== '3000' && window.location.port !== '8080') {
+        return 'http://localhost:3000';
+      }
+      // Nếu chạy trực tiếp trên cổng backend (3000 hoặc 8080)
+      return '';
     };
 
     async function runDiagnostics(quiet = false) {
