@@ -503,7 +503,88 @@ app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) {
     return next();
   }
-  res.sendFile(path.join(__dirname, '../public/index.html'));
+  
+  const fs = require('fs');
+  const indexPath = path.join(__dirname, '../public/index.html');
+  
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    // Trả về trang hướng dẫn trực quan thay vì quăng lỗi ENOENT thô thiển
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Bếp Mẹ Huyền - Phát Triển</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+        <style>
+          body {
+            margin: 0;
+            padding: 0;
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+          }
+          .container {
+            max-width: 550px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+          }
+          h2 {
+            color: #ff6b35;
+            font-size: 1.8rem;
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-weight: 700;
+          }
+          p {
+            color: #9ca3af;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 28px;
+          }
+          .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c52 100%);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+          }
+          .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.45);
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h2>🍲 Máy chủ API Bếp Mẹ Huyền</h2>
+          <p>
+            Bạn đang truy cập vào cổng của <strong>Backend API (Cổng 3000)</strong>. Để kiểm thử giao diện đặt cơm hoạt động theo thời gian thực (Real-time Hot Reload), vui lòng nhấp vào nút bên dưới để mở cổng <strong>Frontend Dev Server (Cổng 5500)</strong>:
+          </p>
+          <a href="http://localhost:5500" class="btn">👉 Mở Giao Diện Đặt Cơm (Cổng 5500)</a>
+        </div>
+      </body>
+      </html>
+    `);
+  }
 });
 
 module.exports = app;
