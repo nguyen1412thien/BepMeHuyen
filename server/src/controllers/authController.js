@@ -120,6 +120,49 @@ class AuthController {
       res.status(500).json({ error: 'Không thể tải dữ liệu hồ sơ cá nhân.', details: error.message });
     }
   }
+
+  /**
+   * Thay đổi mật khẩu tài khoản
+   */
+  static async changePassword(req, res) {
+    try {
+      const { old_password, new_password } = req.body;
+      const userId = req.user.id;
+
+      if (!old_password || !new_password) {
+        return res.status(400).json({ success: false, error: 'Vui lòng cung cấp mật khẩu cũ và mật khẩu mới.' });
+      }
+
+      if (new_password.length < 6) {
+        return res.status(400).json({ success: false, error: 'Mật khẩu mới phải có ít nhất 6 ký tự.' });
+      }
+
+      // Lấy user kèm mật khẩu để so sánh
+      // Lưu ý: findById hiện tại KHÔNG trả về password_hash vì mục đích bảo mật, ta sẽ dùng hàm query trực tiếp hoặc tạo thêm method
+      const db = require('../config/db');
+      const [rows] = await db.query('SELECT password_hash FROM users WHERE id = ?', [userId]);
+      if (rows.length === 0) {
+        return res.status(404).json({ success: false, error: 'Không tìm thấy tài khoản.' });
+      }
+
+      const userHash = rows[0].password_hash;
+      const isMatch = await bcrypt.compare(old_password, userHash);
+
+      if (!isMatch) {
+        return res.status(400).json({ success: false, error: 'Mật khẩu cũ không chính xác.' });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const new_password_hash = await bcrypt.hash(new_password, salt);
+
+      await db.query('UPDATE users SET password_hash = ? WHERE id = ?', [new_password_hash, userId]);
+
+      res.json({ success: true, message: 'Thay đổi mật khẩu thành công.' });
+    } catch (error) {
+      console.error('Lỗi khi đổi mật khẩu:', error);
+      res.status(500).json({ success: false, error: 'Lỗi server khi đổi mật khẩu.', details: error.message });
+    }
+  }
 }
 
 module.exports = AuthController;

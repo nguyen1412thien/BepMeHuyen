@@ -216,6 +216,14 @@ export const api = {
    */
   getProfile: () => apiRequest('/auth/profile'),
 
+  /**
+   * Thay đổi mật khẩu
+   */
+  changePassword: (old_password, new_password) => apiRequest('/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify({ old_password, new_password })
+  }),
+
   // --- HỆ THỐNG KIỂM TRA CHẨN ĐOÁN (DIAGNOSTICS & DB OPERATIONS) ---
   /**
    * Gọi API kiểm tra hiệu năng & tình trạng kết nối CSDL MySQL

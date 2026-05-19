@@ -47,6 +47,16 @@ Tài liệu này tổng hợp toàn bộ các tính năng, thay đổi và tối
   - Giao diện dạng tròn thay thế ảnh đại diện, có icon upload thay thế trực quan khi chưa có ảnh.
   - Sử dụng hàm gọi API `uploadUserAvatar` để tải ảnh lên máy chủ, nhận lại `imageUrl` ngay lập tức và render trực tiếp trong Form. Bảng người dùng ở Dashboard cũng tự động thu nhỏ và hiển thị Avatar của từng người.
 
+### 1.7. Thay Đổi Mật Khẩu (Change Password)
+- **Backend**: Thêm endpoint `POST /api/auth/change-password` trong `authRoutes.js`. Controller `AuthController.changePassword` được bổ sung để xử lý: 
+  - Trích xuất ID user từ token xác thực.
+  - Yêu cầu người dùng cung cấp mật khẩu cũ (`old_password`) và mật khẩu mới (`new_password`).
+  - Kiểm tra tính xác thực của mật khẩu cũ bằng `bcrypt.compare`.
+  - Mã hóa mật khẩu mới bằng `bcrypt.hash` với salt 10 và cập nhật vào Database.
+- **Frontend**:
+  - Thêm một Component độc lập `ChangePasswordModal` ở thư mục `components/ChangePasswordModal` chuyên trách việc lấy input và xác nhận.
+  - Tích hợp Modal này vào Navbar. Khi user (bất kỳ role nào) đăng nhập, sẽ thấy icon Chìa Khóa 🔑 nằm kế bên nút Đăng Xuất. Click vào sẽ hiển thị Modal Đổi Mật Khẩu.
+
 ---
 
 ## 2. Chuẩn Hóa Cấu Trúc Dự Án (Refactoring)

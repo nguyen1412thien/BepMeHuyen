@@ -9,5 +9,6 @@ router.post('/login', AuthController.login);
 
 // 2. Tuyến bảo mật (Protected Routes)
 router.get('/profile', authMiddleware, AuthController.getProfile);
+router.post('/change-password', authMiddleware, AuthController.changePassword);
 
 module.exports = router;
