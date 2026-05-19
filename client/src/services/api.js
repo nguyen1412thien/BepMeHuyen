@@ -1,4 +1,12 @@
-const API_BASE_URL = 'http://localhost:3000/api';
+// Tự động nhận diện URL máy chủ Backend thích ứng môi trường Local và Production
+const getApiBaseUrl = () => {
+  if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+    return '/api';
+  }
+  return 'http://localhost:3000/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Hàm hỗ trợ gửi request kèm hoặc không kèm token bảo mật
@@ -64,9 +72,48 @@ export const api = {
    */
   getProfile: () => apiRequest('/auth/profile'),
 
-  // --- HỆ THỐNG KIỂM TRA CHẨN ĐOÁN (DIAGNOSTICS) ---
+  // --- HỆ THỐNG KIỂM TRA CHẨN ĐOÁN (DIAGNOSTICS & DB OPERATIONS) ---
   /**
    * Gọi API kiểm tra hiệu năng & tình trạng kết nối CSDL MySQL
    */
-  getDiagnostics: () => apiRequest('/diagnostics')
+  getDiagnostics: () => apiRequest('/diagnostics'),
+
+  /**
+   * Lấy sơ đồ dữ liệu quan hệ ERD (foreign keys, columns)
+   */
+  getERD: () => apiRequest('/diagnostics/erd'),
+
+  /**
+   * Lấy danh sách toàn bộ bản ghi của một bảng cụ thể
+   */
+  getTableRows: (tableName) => apiRequest(`/diagnostics/table-rows/${tableName}`),
+
+  /**
+   * Cập nhật giá trị của một ô dữ liệu cụ thể trong bảng
+   */
+  updateCell: (tableName, id, field, value) => apiRequest(`/diagnostics/update-cell/${tableName}/${id}`, {
+    method: 'POST',
+    body: JSON.stringify({ field, value })
+  }),
+
+  /**
+   * Xóa một dòng dữ liệu theo ID
+   */
+  deleteRow: (tableName, id) => apiRequest(`/diagnostics/delete-row/${tableName}/${id}`, {
+    method: 'DELETE'
+  }),
+
+  /**
+   * Thực hiện khởi tạo cấu trúc các bảng CSDL gốc
+   */
+  createTables: () => apiRequest('/diagnostics/create-table', {
+    method: 'POST'
+  }),
+
+  /**
+   * Thực hiện nạp dữ liệu món ăn mẫu
+   */
+  insertSampleData: () => apiRequest('/diagnostics/insert-data', {
+    method: 'POST'
+  })
 };
