@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # MySQL Database Service
+  db:
+    image: mysql:8.0
+    container_name: bep_me_huyen_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: bep_root_password
+      MYSQL_DATABASE: bep_me_huyen
+      MYSQL_USER: bep_user
+      MYSQL_PASSWORD: bep_password
+    ports:
+      - "3306:3306"
+    volumes:
+      # Persist MySQL data on host machine
+      - db_data:/var/lib/mysql
+      # Auto-seed tables and initial data on container creation
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - bep_network
+
+  # Node.js + Frontend Application Service
+  app:
+    build: .
+    container_name: bep_me_huyen_app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DB_HOST=db
+      - DB_USER=bep_user
+      - DB_PASSWORD=bep_password
+      - DB_NAME=bep_me_huyen
+      - NODE_ENV=production
+    depends_on:
+      - db
+    networks:
+      - bep_network
+
+volumes:
+  db_data:
+
+networks:
+  bep_network:
+    driver: bridge
