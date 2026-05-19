@@ -1,0 +1,46 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Chạy Server (Backend)",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/server"
+      },
+      "presentation": {
+        "group": "bep_me_huyen",
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Chạy Giao Diện (Frontend)",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/client"
+      },
+      "presentation": {
+        "group": "bep_me_huyen",
+        "reveal": "always",
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Khởi Chạy Toàn Bộ Dự Án (Backend & Frontend)",
+      "dependsOn": [
+        "Chạy Server (Backend)",
+        "Chạy Giao Diện (Frontend)"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    }
+  ]
+}

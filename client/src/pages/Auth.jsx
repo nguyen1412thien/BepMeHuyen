@@ -117,7 +117,7 @@ const Auth = ({ onLoginSuccess }) => {
         {/* Tab contents */}
         {activeTab === 'login' ? (
           <form onSubmit={handleLoginSubmit} className="auth-form">
-            <h2>Chào Mừng Bồ Quay Lại!</h2>
+            <h2>Chào Mừng Bạn Quay Lại!</h2>
             <p className="form-subtitle">Đăng nhập tài khoản để nhận ưu đãi và xem lịch sử đặt cơm.</p>
 
             <div className="form-group">
@@ -135,7 +135,7 @@ const Auth = ({ onLoginSuccess }) => {
               <label><i className="fa-solid fa-lock"></i> Mật khẩu</label>
               <input 
                 type="password" 
-                placeholder="Nhập mật khẩu của bồ" 
+                placeholder="Nhập mật khẩu của bạn" 
                 value={loginPassword} 
                 onChange={(e) => setLoginPassword(e.target.value)} 
                 required 
@@ -156,7 +156,7 @@ const Auth = ({ onLoginSuccess }) => {
             <p className="form-subtitle">Đăng ký ngay để đặt cơm nhanh chóng và tiện lợi nhất.</p>
 
             <div className="form-group">
-              <label><i className="fa-solid fa-signature"></i> Họ và tên của bồ</label>
+              <label><i className="fa-solid fa-signature"></i> Họ và tên của bạn</label>
               <input 
                 type="text" 
                 placeholder="Ví dụ: Nguyễn Văn Khách" 

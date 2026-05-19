@@ -1,1 +1,1 @@
--- Tệp tin nạp dữ liệu mẫu (seed) của bồ
+-- Tệp tin nạp dữ liệu mẫu (seed) khởi tạo cơ sở dữ liệu

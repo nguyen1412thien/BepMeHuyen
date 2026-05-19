@@ -278,7 +278,7 @@ const Home = () => {
             <p className="modal-message">{orderSuccess.message}</p>
             <div className="order-details-card">
               <div>Mã Đơn Hàng: <strong>#{orderSuccess.orderId}</strong></div>
-              <div style={{ marginTop: '8px' }}>Nhà bếp đã nhận được đơn đặt cơm của bồ và đang nổi lửa chế biến ngay. Giao hàng trong vòng 30 phút!</div>
+              <div style={{ marginTop: '8px' }}>Nhà bếp đã nhận được đơn đặt hàng của bạn và đang chuẩn bị chế biến ngay. Đơn hàng sẽ được giao trong vòng 30 phút!</div>
             </div>
             <button onClick={() => setOrderSuccess(null)} className="btn btn-primary w-100">
               Tuyệt vời, cảm ơn Mẹ!

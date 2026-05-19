@@ -1,20 +1,20 @@
-# Use the official lightweight Node.js 18 image on Alpine Linux
+# Sử dụng image Node.js 18 nhẹ trên Alpine Linux
 FROM node:18-alpine
 
-# Set the working directory inside the container
+# Thiết lập thư mục làm việc bên trong container
 WORKDIR /usr/src/app
 
-# Copy dependency definition files
-COPY package*.json ./
+# Sao chép các file định nghĩa package từ thư mục server/
+COPY server/package*.json ./
 
-# Install application dependencies (omit devDependencies for production runtime)
+# Cài đặt các thư viện sản xuất (bỏ qua devDependencies để tối ưu dung lượng)
 RUN npm ci --only=production
 
-# Copy the rest of the application files (code, config, public assets)
-COPY . .
+# Sao chép toàn bộ mã nguồn backend vào container
+COPY server/ ./
 
-# Expose the application port
+# Mở cổng API backend (mặc định cổng 3000)
 EXPOSE 3000
 
-# Run the app
-CMD [ "node", "index.js" ]
+# Khởi chạy ứng dụng backend qua src/server.js
+CMD [ "node", "src/server.js" ]

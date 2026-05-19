@@ -42,8 +42,8 @@ async function runDiagnosticDashboard() {
     console.log(`📋 Tổng số bảng hiện có   : ${tables.length}`);
 
     if (tables.length === 0) {
-      console.log('   ⚠️ CẢNH BÁO: Database rỗng (chưa có bảng nào được khởi tạo).');
-      console.log('   👉 Tip: Bồ hãy chạy file schema.sql để tạo bảng users nhé.');
+      console.log('   ⚠️ CẢNH BÁO: Cơ sở dữ liệu đang rỗng (chưa có bảng nào được khởi tạo).');
+      console.log('   👉 Gợi ý: Bạn vui lòng chạy tệp tin schema.sql để khởi tạo cấu trúc cơ sở dữ liệu.');
     } else {
       console.log('   Danh sách các bảng đã quét thấy:');
       tables.forEach((t, i) => {
@@ -65,7 +65,7 @@ async function runDiagnosticDashboard() {
     console.log(`❌ Mã lỗi (Code) : ${error.code || 'N/A'}`);
     console.log('------------------------------------------------------');
     console.log('👉 HƯỚNG DẪN KHẮC PHỤC NHANH:');
-    console.log('   1. Đảm bảo máy chủ MySQL của bồ đang trực tuyến.');
+    console.log('   1. Đảm bảo máy chủ cơ sở dữ liệu MySQL đang hoạt động trực tuyến.');
     console.log('   2. Kiểm tra xem mật khẩu hoặc địa chỉ IP host trong');
     console.log('      tệp server/.env có bị gõ sai hay không.');
     console.log('   3. Kiểm tra xem tường lửa (Firewall) của máy chủ có chặn');

@@ -1,0 +1,14 @@
+# Bỏ qua node_modules của cả client và server
+server/node_modules
+client/node_modules
+
+# Bỏ qua thư mục code frontend client (vì Dockerfile này chỉ phục vụ dựng backend app)
+client
+
+# Bỏ qua các file rác hệ thống và cấu hình local
+.git
+.gitignore
+.vscode
+.DS_Store
+*.log
+npm-debug.log*

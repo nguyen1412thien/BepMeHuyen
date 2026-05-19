@@ -1,0 +1,10 @@
+{
+  "name": "bep-me-huyen-root",
+  "version": "1.0.0",
+  "description": "Unified launcher for Bếp Mẹ Huyền Project",
+  "scripts": {
+    "dev": "npm run dev --prefix server & npm run dev --prefix client",
+    "install-all": "npm install --prefix server && npm install --prefix client"
+  },
+  "private": true
+}

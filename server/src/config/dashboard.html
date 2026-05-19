@@ -839,7 +839,7 @@
         errorBlock.innerHTML = `
           <strong>❌ LỖI HỆ THỐNG:</strong> ${err.message}
           <div class="error-tip">
-            💡 <strong>Gợi ý:</strong> Hãy đảm bảo bồ đã bật server backend Node.js bằng cách chạy lệnh <code>node src/server.js</code> trong thư mục <code>server</code>!
+            💡 <strong>Gợi ý:</strong> Vui lòng đảm bảo ứng dụng Server Node.js đang hoạt động bằng cách khởi chạy lệnh <code>npm run dev</code> hoặc <code>node src/server.js</code> trong thư mục <code>server</code>!
           </div>
         `;
       } finally {
@@ -1099,7 +1099,7 @@
 
     // Xóa dòng dữ liệu
     async function deleteTableRow(tableName, id) {
-      if (!confirm(`Bồ có chắc chắn muốn xóa vĩnh viễn bản ghi #${id} trong bảng '${tableName}' không?`)) return;
+      if (!confirm(`Bạn có chắc chắn muốn xóa vĩnh viễn dòng dữ liệu mang mã số #${id} trong bảng '${tableName}' không?`)) return;
 
       try {
         const res = await fetch(`${getBaseUrl()}/api/diagnostics/delete-row/${tableName}/${id}`, {
