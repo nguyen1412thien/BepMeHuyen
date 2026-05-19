@@ -175,6 +175,9 @@
   border-radius: 24px;
   padding: 24px;
   box-shadow: 0 10px 30px var(--glass-shadow);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 120px);
 }
 
 .cart-card h2 {
@@ -209,10 +212,45 @@
   font-size: 0.9rem;
 }
 
+/* Cart Scroll Body Container */
+.cart-form-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.cart-scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 6px;
+  margin-bottom: 12px;
+}
+
+/* Custom Scrollbar for Cart Body */
+.cart-scroll-body::-webkit-scrollbar {
+  width: 6px;
+}
+.cart-scroll-body::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 3px;
+}
+.cart-scroll-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+.cart-scroll-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.cart-sticky-action {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 12px;
+}
+
 /* Cart Items */
 .cart-items-list {
-  max-height: 240px;
-  overflow-y: auto;
   margin-bottom: 20px;
   padding-right: 4px;
 }
@@ -585,3 +623,122 @@
     margin: 16px;
   }
 }
+
+/* Kitchen selection and card-grid styling */
+.kitchen-selection-wrapper {
+  margin-bottom: 24px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px var(--glass-shadow);
+}
+
+.kitchen-section-title {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kitchen-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.kitchen-branch-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  padding: 16px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.kitchen-branch-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 107, 53, 0.4);
+  background: rgba(255, 107, 53, 0.02);
+}
+
+.kitchen-branch-card.active {
+  border-color: var(--primary);
+  background: rgba(255, 107, 53, 0.05);
+  box-shadow: 0 0 15px rgba(255, 107, 53, 0.15);
+}
+
+.branch-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.branch-status-dot {
+  width: 8px;
+  height: 8px;
+  background: #2ecc71;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #2ecc71;
+}
+
+.branch-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #FFF;
+  flex: 1;
+}
+
+.selected-check {
+  font-size: 0.75rem;
+  color: var(--primary);
+  font-weight: 700;
+  background: rgba(255, 107, 53, 0.12);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.branch-address {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0 0 12px 0;
+  flex: 1;
+}
+
+.branch-meta-owner {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding-top: 8px;
+}
+
+.branch-meta-owner i {
+  color: var(--secondary);
+  margin-right: 4px;
+}
+
+.shipping-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.distance-info-tag {
+  font-size: 0.75rem;
+  color: var(--primary);
+  background: rgba(255, 107, 53, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+}
+

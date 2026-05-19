@@ -30,7 +30,7 @@
   margin-bottom: 30px;
 }
 
-.tab-btn {
+.auth-tab-btn {
   flex: 1;
   background: none;
   border: none;
@@ -44,11 +44,11 @@
   transition: var(--transition-smooth);
 }
 
-.tab-btn:hover {
+.auth-tab-btn:hover {
   color: var(--text-primary);
 }
 
-.tab-btn.active {
+.auth-tab-btn.active {
   background: var(--surface-dark);
   color: var(--primary);
   border: 1px solid var(--border-glow);

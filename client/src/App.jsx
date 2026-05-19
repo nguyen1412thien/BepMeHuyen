@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { api } from './services/api';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Auth from './pages/Auth';
 import Diagnostics from './pages/Diagnostics';
+import MyOrders from './pages/MyOrders';
+import StaffDashboard from './pages/StaffDashboard';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -32,6 +34,8 @@ const App = () => {
     restoreSession();
   }, []);
 
+
+
   const handleLoginSuccess = (userData) => {
     setUser(userData);
   };
@@ -42,6 +46,8 @@ const App = () => {
     setUser(null);
     console.log('🔒 Đã đăng xuất khỏi hệ thống.');
   };
+
+  const isStaff = user && (user.role === 'staff' || user.role === 'admin');
 
   if (initializing) {
     return (
@@ -74,11 +80,19 @@ const App = () => {
       <Navbar user={user} onLogout={handleLogout} />
       <div className="navbar-spacer"></div>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home user={user} />} />
         <Route path="/auth" element={<Auth onLoginSuccess={handleLoginSuccess} />} />
         <Route 
+          path="/my-orders" 
+          element={user ? <MyOrders /> : <Navigate to="/auth" />} 
+        />
+        <Route 
+          path="/dashboard" 
+          element={isStaff ? <StaffDashboard user={user} /> : <Navigate to="/" />} 
+        />
+        <Route 
           path="/database" 
-          element={user && user.role === 'admin' ? <Diagnostics /> : <Home />} 
+          element={user && user.role === 'admin' ? <Diagnostics /> : <Navigate to="/" />} 
         />
       </Routes>
     </Router>

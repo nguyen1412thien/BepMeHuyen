@@ -10,7 +10,7 @@ async function apiRequest(endpoint, options = {}) {
   const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
   
   const headers = {
-    'Content-Type': 'application/json',
+    ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
     ...(token && { 'Authorization': `Bearer ${token}` }),
     ...options.headers
   };
@@ -31,18 +31,167 @@ async function apiRequest(endpoint, options = {}) {
 }
 
 export const api = {
-  // --- THỰC ĐƠN & ĐƠN HÀNG ---
+  // --- THỰC ĐƠN ---
   /**
-   * Lấy danh sách món ăn từ thực đơn
+   * Lấy danh sách món ăn từ thực đơn (lọc theo chi nhánh bếp nếu có)
    */
-  getMenu: () => apiRequest('/menu'),
+  getMenu: (kitchenId = null) => {
+    const url = kitchenId ? `/menu?kitchen_id=${kitchenId}` : '/menu';
+    return apiRequest(url).then(res => res.data || res);
+  },
 
+  /**
+   * Thêm món ăn mới (Staff/Admin)
+   */
+  createMenuItem: (data) => apiRequest('/menu', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+
+  /**
+   * Cập nhật thông tin món ăn (Staff/Admin)
+   */
+  updateMenuItem: (id, data) => apiRequest(`/menu/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }),
+
+  /**
+   * Xóa món ăn khỏi thực đơn (Staff/Admin)
+   */
+  deleteMenuItem: (id) => apiRequest(`/menu/${id}`, {
+    method: 'DELETE'
+  }),
+
+  /**
+   * Upload ảnh món ăn mới (chụp ảnh hoặc upload file)
+   */
+  uploadMenuItemImage: (formData) => apiRequest('/menu/upload', {
+    method: 'POST',
+    body: formData
+  }),
+
+  // --- ĐỊA CHỈ GIAO HÀNG (USERS) ---
+  /**
+   * Lấy các địa chỉ giao hàng đã lưu của user
+   */
+  getAddresses: () => apiRequest('/addresses').then(res => res.data || []),
+
+  /**
+   * Lưu địa chỉ giao hàng mới
+   */
+  createAddress: (data) => apiRequest('/addresses', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+
+  /**
+   * Đặt địa chỉ làm mặc định
+   */
+  setDefaultAddress: (id) => apiRequest(`/addresses/${id}/default`, {
+    method: 'PATCH'
+  }),
+
+  /**
+   * Xóa địa chỉ đã lưu
+   */
+  deleteAddress: (id) => apiRequest(`/addresses/${id}`, {
+    method: 'DELETE'
+  }),
+
+  // --- CHI NHÁNH NHÀ BẾP (KITCHENS) ---
+  /**
+   * Lấy danh sách toàn bộ các chi nhánh nhà bếp
+   */
+  getKitchens: (all = false) => {
+    const url = all ? '/kitchens?all=true' : '/kitchens';
+    return apiRequest(url).then(res => res.data || []);
+  },
+
+  /**
+   * Tìm nhà bếp gần nhất dựa trên tọa độ
+   */
+  getNearestKitchen: (lat, lng) => apiRequest('/kitchens/nearest', {
+    method: 'POST',
+    body: JSON.stringify({ lat, lng })
+  }).then(res => res.data || res),
+
+  /**
+   * Lấy bếp mặc định (Trần Thị Huyền)
+   */
+  getDefaultKitchen: () => apiRequest('/kitchens/default').then(res => res.data || null),
+
+  /**
+   * Tạo chi nhánh bếp mới (Staff/Admin)
+   */
+  createKitchen: (data) => apiRequest('/kitchens', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+
+  /**
+   * Cập nhật thông tin chi nhánh bếp (Staff/Admin)
+   */
+  updateKitchen: (id, data) => apiRequest(`/kitchens/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }),
+
+  /**
+   * Xóa chi nhánh bếp (Staff/Admin)
+   */
+  deleteKitchen: (id) => apiRequest(`/kitchens/${id}`, {
+    method: 'DELETE'
+  }),
+
+  // --- ĐƠN HÀNG ---
   /**
    * Gửi đơn đặt hàng mới
    */
   placeOrder: (orderData) => apiRequest('/orders', {
     method: 'POST',
     body: JSON.stringify(orderData)
+  }),
+
+  /**
+   * Lấy lịch sử đơn hàng cá nhân (User)
+   */
+  getMyOrders: () => apiRequest('/orders/my').then(res => res.data || []),
+
+  /**
+   * Lấy toàn bộ đơn hàng (Staff/Admin)
+   */
+  getAllOrders: (status = null) => {
+    const url = status ? `/orders?status=${status}` : '/orders';
+    return apiRequest(url).then(res => res.data || []);
+  },
+
+  /**
+   * Cập nhật trạng thái của đơn hàng (Staff/Admin)
+   */
+  updateOrderStatus: (id, status, cancelReason = null) => apiRequest(`/orders/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ order_status: status, cancel_reason: cancelReason })
+  }),
+
+  /**
+   * Lấy đơn hàng cho khách vãng lai bằng số điện thoại / danh sách orderIds
+   */
+  getGuestOrders: (phone = '', orderIds = []) => {
+    let url = `/orders/guest?`;
+    const params = [];
+    if (phone) params.push(`phone=${encodeURIComponent(phone)}`);
+    if (orderIds && orderIds.length > 0) params.push(`orderIds=${orderIds.join(',')}`);
+    url += params.join('&');
+    return apiRequest(url).then(res => res.data || []);
+  },
+
+  /**
+   * Tính toán phí giao hàng & khoảng cách (Google Maps / Coords)
+   */
+  calculateShipping: (payload) => apiRequest('/orders/calculate-shipping', {
+    method: 'POST',
+    body: JSON.stringify(payload)
   }),
 
   // --- HỆ THỐNG XÁC THỰC (AUTHENTICATION) ---
@@ -110,5 +259,6 @@ export const api = {
    */
   insertSampleData: () => apiRequest('/diagnostics/insert-data', {
     method: 'POST'
-  })
+  }),
+
 };

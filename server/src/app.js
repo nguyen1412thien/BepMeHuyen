@@ -14,6 +14,11 @@ const adminMiddleware = (req, res, next) => {
   }
 };
 
+const menuRoutes = require('./routes/menuRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const kitchenRoutes = require('./routes/kitchenRoutes');
+const addressRoutes = require('./routes/addressRoutes');
+
 const app = express();
 
 // 1. Cấu hình Middleware toàn cục
@@ -24,161 +29,13 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 // 2. Gắn kết các cổng API Phân quyền
 app.use('/api/auth', authRoutes);
+app.use('/api/menu', menuRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/kitchens', kitchenRoutes);
+app.use('/api/addresses', addressRoutes);
 
-// --- Khởi tạo Thực đơn Fallback Dự phòng ---
-const fallbackMenu = [
-  {
-    id: 1,
-    name: 'Thịt Kho Tàu Mẹ Nấu',
-    description: 'Thịt ba chỉ heo kho rệu mềm ngấm vị cùng trứng vịt, nước dừa xiêm ngọt thanh đậm đà chuẩn vị cơm nhà.',
-    price: 75000.00,
-    category: 'Main Course',
-    image_url: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=600&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 2,
-    name: 'Cá Lóc Kho Tộ',
-    description: 'Cá lóc đồng kho tộ sền sệt, cay nồng tiêu sọ, thơm hành lá và mỡ hành béo ngậy ăn cực hao cơm.',
-    price: 80000.00,
-    category: 'Main Course',
-    image_url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 3,
-    name: 'Sườn Xào Chua Ngọt',
-    description: 'Sườn non rim chín mềm, áo lớp sốt chua ngọt từ cà chua và me rừng thơm lừng, rắc chút vừng rang thơm phức.',
-    price: 85000.00,
-    category: 'Main Course',
-    image_url: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=600&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 4,
-    name: 'Canh Chua Cá Lóc Nam Bộ',
-    description: 'Canh chua cá lóc nấu kèm dọc mùng, đậu bắp, thơm, cà chua, ngò om ngò gai và giá đỗ, thanh mát giải nhiệt.',
-    price: 85000.00,
-    category: 'Soup',
-    image_url: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=600&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 5,
-    name: 'Canh Cua Rau Đay Cà Pháo',
-    description: 'Canh cua đồng xay nấu rau đay mồng tơi ngọt lịm gạch cua béo ngậy, ăn kèm đĩa cà pháo muối giòn tan.',
-    price: 65000.00,
-    category: 'Soup',
-    image_url: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=600&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 6,
-    name: 'Rau Muống Xào Tỏi',
-    description: 'Rau muống xanh giòn xào tỏi Lý Sơn phi thơm lừng, giữ trọn độ ngọt tự nhiên và màu xanh mát mắt.',
-    price: 40000.00,
-    category: 'Side Dish',
-    image_url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 7,
-    name: 'Trứng Đúc Thịt Băm',
-    description: 'Trứng vịt chiên đúc thịt nạc heo băm, mộc nhĩ hành hoa, thơm mềm béo ngậy, món ngon giản dị cực đưa cơm.',
-    price: 45000.00,
-    category: 'Side Dish',
-    image_url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 8,
-    name: 'Nước Mơ Muối Đường Phèn',
-    description: 'Nước quả mơ chùa Hương muối lâu năm pha đường phèn mát lạnh, thanh giọng giải khát mùa hè.',
-    price: 20000.00,
-    category: 'Drink',
-    image_url: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=600&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 9,
-    name: 'Trà Xanh Tươi Đá',
-    description: 'Lá chè xanh tươi om ấm nóng rồi lắc đá mát lạnh, thơm hương nhài nhẹ nhàng, tốt cho sức khỏe.',
-    price: 12000.00,
-    category: 'Drink',
-    image_url: 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=600&auto=format&fit=crop&q=60'
-  },
-  {
-    id: 10,
-    name: 'Chè Trôi Nước Đường Mật',
-    description: 'Viên chè trôi nước nhân đậu xanh dừa nạo mềm dẻo, chan nước đường mật mía gừng cay ấm, rắc vừng rang.',
-    price: 25000.00,
-    category: 'Dessert',
-    image_url: 'https://images.unsplash.com/photo-1536256263959-770b48d82b0a?w=600&auto=format&fit=crop&q=60'
-  }
-];
 
-// A. API lấy toàn bộ thực đơn (Resilient Query Fallback)
-app.get('/api/menu', async (req, res) => {
-  if (!pool) {
-    console.warn('⚠️ [Database] Pool chưa khởi tạo. Đang trả thực đơn dự phòng.');
-    return res.json(fallbackMenu);
-  }
-  try {
-    const [rows] = await pool.query('SELECT * FROM menu_items WHERE active = 1');
-    res.json(rows);
-  } catch (err) {
-    console.warn('⚠️ [Database] Bảng menu_items chưa sẵn sàng hoặc rỗng. Đang phục vụ thực đơn dự phòng.');
-    res.json(fallbackMenu);
-  }
-});
 
-// B. API Đặt món mới (Resilient Graceful Fallback - Phục vụ cả Khách vãng lai & Thành viên)
-app.post('/api/orders', async (req, res) => {
-  const { user_id, customer_name, customer_phone, customer_address, notes, items, total_amount } = req.body;
-
-  if (!customer_name || !customer_phone || !customer_address || !items || !items.length) {
-    return res.status(400).json({ error: 'Thiếu thông tin đặt hàng cần thiết.' });
-  }
-
-  if (!pool) {
-    const offlineOrderId = Date.now();
-    console.warn(`⚠️ [Offline Mode] Pool chưa khởi tạo. Mô phỏng đặt hàng #${offlineOrderId}`);
-    return res.status(201).json({
-      message: 'Đặt món thành công! (Mô phỏng do CSDL đang tải)',
-      orderId: offlineOrderId
-    });
-  }
-
-  const conn = await pool.getConnection();
-  try {
-    await conn.beginTransaction();
-
-    const [orderResult] = await conn.query(
-      'INSERT INTO orders (user_id, customer_name, customer_phone, customer_address, notes, total_amount) VALUES (?, ?, ?, ?, ?, ?)',
-      [user_id || null, customer_name, customer_phone, customer_address, notes || '', total_amount]
-    );
-    const orderId = orderResult.insertId;
-
-    const itemQueries = items.map(item => {
-      return conn.query(
-        'INSERT INTO order_items (order_id, menu_item_id, quantity, price) VALUES (?, ?, ?, ?)',
-        [orderId, item.id, item.quantity, item.price]
-      );
-    });
-
-    await Promise.all(itemQueries);
-    await conn.commit();
-
-    console.log(`✅ Lưu đơn hàng #${orderId} vào DB thành công.`);
-    res.status(201).json({
-      message: 'Đặt món thành công!',
-      orderId: orderId
-    });
-  } catch (err) {
-    await conn.rollback();
-    console.warn('⚠️ [Database] Các bảng đơn hàng chưa sẵn sàng. Mô phỏng lưu trữ offline.');
-    const offlineOrderId = Date.now();
-    console.log(`📝 [Thông tin Đơn Hàng] ID: #${offlineOrderId} | Khách: ${customer_name} | Tổng tiền: ${total_amount}đ`);
-    res.status(201).json({
-      message: 'Đặt món thành công! (Lưu trữ offline mô phỏng)',
-      orderId: offlineOrderId
-    });
-  } finally {
-    conn.release();
-  }
-});
 
 // C. API kiểm tra chẩn đoán kết nối CSDL (Bảo mật: Chỉ dành cho Admin)
 app.get('/api/diagnostics', authMiddleware, adminMiddleware, async (req, res) => {

@@ -107,13 +107,13 @@ const Auth = ({ onLoginSuccess }) => {
         <div className="tabs-header">
           <button 
             onClick={() => handleTabChange('login')} 
-            className={`tab-btn ${activeTab === 'login' ? 'active' : ''}`}
+            className={`auth-tab-btn ${activeTab === 'login' ? 'active' : ''}`}
           >
             Đăng Nhập
           </button>
           <button 
             onClick={() => handleTabChange('register')} 
-            className={`tab-btn ${activeTab === 'register' ? 'active' : ''}`}
+            className={`auth-tab-btn ${activeTab === 'register' ? 'active' : ''}`}
           >
             Đăng Ký
           </button>
