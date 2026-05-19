@@ -263,10 +263,14 @@ export const api = {
 
   // --- QUẢN LÝ NGƯỜI DÙNG (ADMIN) ---
   /**
-   * Lấy danh sách người dùng (có phân trang)
+   * Lấy danh sách người dùng (có phân trang và bộ lọc)
    */
-  getAllUsers: (page = 1, limit = 10) => {
-    return apiRequest(`/users?page=${page}&limit=${limit}`).then(res => res);
+  getAllUsers: (page = 1, limit = 10, filters = {}) => {
+    let url = `/users?page=${page}&limit=${limit}`;
+    if (filters.search) url += `&search=${encodeURIComponent(filters.search)}`;
+    if (filters.role) url += `&role=${encodeURIComponent(filters.role)}`;
+    if (filters.status !== undefined && filters.status !== '') url += `&status=${filters.status}`;
+    return apiRequest(url).then(res => res);
   },
 
   /**

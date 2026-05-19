@@ -27,25 +27,71 @@ class UserModel {
   }
 
   /**
-   * Lấy danh sách tất cả người dùng (hỗ trợ phân trang)
+   * Lấy danh sách tất cả người dùng (hỗ trợ phân trang và tìm kiếm/lọc)
    * @param {number} limit
    * @param {number} offset
+   * @param {Object} filters
    * @returns {Promise<Array>}
    */
-  static async findAll(limit = 10, offset = 0) {
-    const [rows] = await db.query(
-      'SELECT id, email, full_name, phone, role, is_active, created_at, updated_at FROM users ORDER BY id DESC LIMIT ? OFFSET ?',
-      [limit, offset]
-    );
+  static async findAll(limit = 10, offset = 0, filters = {}) {
+    let query = 'SELECT id, email, full_name, phone, role, is_active, created_at, updated_at FROM users';
+    const queryParams = [];
+    const whereConditions = [];
+
+    if (filters.search) {
+      whereConditions.push('(email LIKE ? OR full_name LIKE ? OR phone LIKE ?)');
+      const searchParam = `%${filters.search}%`;
+      queryParams.push(searchParam, searchParam, searchParam);
+    }
+    if (filters.role) {
+      whereConditions.push('role = ?');
+      queryParams.push(filters.role);
+    }
+    if (filters.status !== undefined && filters.status !== '') {
+      whereConditions.push('is_active = ?');
+      queryParams.push(filters.status);
+    }
+
+    if (whereConditions.length > 0) {
+      query += ' WHERE ' + whereConditions.join(' AND ');
+    }
+
+    query += ' ORDER BY id DESC LIMIT ? OFFSET ?';
+    queryParams.push(limit, offset);
+
+    const [rows] = await db.query(query, queryParams);
     return rows;
   }
 
   /**
    * Đếm tổng số lượng người dùng
+   * @param {Object} filters
    * @returns {Promise<number>}
    */
-  static async countAll() {
-    const [rows] = await db.query('SELECT COUNT(*) as total FROM users');
+  static async countAll(filters = {}) {
+    let query = 'SELECT COUNT(*) as total FROM users';
+    const queryParams = [];
+    const whereConditions = [];
+
+    if (filters.search) {
+      whereConditions.push('(email LIKE ? OR full_name LIKE ? OR phone LIKE ?)');
+      const searchParam = `%${filters.search}%`;
+      queryParams.push(searchParam, searchParam, searchParam);
+    }
+    if (filters.role) {
+      whereConditions.push('role = ?');
+      queryParams.push(filters.role);
+    }
+    if (filters.status !== undefined && filters.status !== '') {
+      whereConditions.push('is_active = ?');
+      queryParams.push(filters.status);
+    }
+
+    if (whereConditions.length > 0) {
+      query += ' WHERE ' + whereConditions.join(' AND ');
+    }
+
+    const [rows] = await db.query(query, queryParams);
     return rows[0].total;
   }
 

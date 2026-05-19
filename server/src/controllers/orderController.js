@@ -1,8 +1,8 @@
 const OrderModel = require('../models/orderModel');
 const KitchenModel = require('../models/kitchenModel');
 
-// Phí ship đồng giá: 15,000 VNĐ cho mọi đơn hàng
-const FLAT_SHIPPING_FEE = 15000;
+// Phí ship đồng giá: 10,000 VNĐ cho mọi đơn hàng
+const FLAT_SHIPPING_FEE = 10000;
 
 class OrderController {
   /** POST /api/orders — Đặt hàng mới (Hỗ trợ khách vãng lai và thành viên) */

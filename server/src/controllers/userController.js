@@ -11,8 +11,14 @@ class UserController {
       const limit = parseInt(req.query.limit) || 10;
       const offset = (page - 1) * limit;
 
-      const users = await UserModel.findAll(limit, offset);
-      const total = await UserModel.countAll();
+      const filters = {
+        search: req.query.search || '',
+        role: req.query.role || '',
+        status: req.query.status !== undefined ? req.query.status : ''
+      };
+
+      const users = await UserModel.findAll(limit, offset, filters);
+      const total = await UserModel.countAll(filters);
       const totalPages = Math.ceil(total / limit);
 
       res.json({ 

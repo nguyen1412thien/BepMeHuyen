@@ -14,6 +14,23 @@ const AccountsManager = ({ showAlert }) => {
   const [totalPages, setTotalPages] = useState(1);
   const limit = 10;
 
+  // Filter states
+  const [filters, setFilters] = useState({
+    search: '',
+    role: '',
+    status: ''
+  });
+  
+  // Debounce search input
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(filters.search);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [filters.search]);
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -26,7 +43,12 @@ const AccountsManager = ({ showAlert }) => {
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const response = await api.getAllUsers(currentPage, limit);
+      const currentFilters = {
+        search: debouncedSearch,
+        role: filters.role,
+        status: filters.status
+      };
+      const response = await api.getAllUsers(currentPage, limit, currentFilters);
       // Giả sử API trả về { success: true, data: [...], pagination: { totalPages, ... } }
       setUsers(response.data || []);
       if (response.pagination) {
@@ -45,7 +67,12 @@ const AccountsManager = ({ showAlert }) => {
 
   useEffect(() => {
     loadUsers();
-  }, [currentPage]);
+  }, [currentPage, debouncedSearch, filters.role, filters.status]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, filters.role, filters.status]);
 
   const handleOpenModal = (user = null) => {
     if (user) {
@@ -139,6 +166,37 @@ const AccountsManager = ({ showAlert }) => {
         <button className="btn btn-primary" onClick={() => handleOpenModal()}>
           <i className="fa-solid fa-user-plus"></i> Thêm Tài Khoản
         </button>
+      </div>
+
+      <div className="accounts-filters">
+        <div className="search-box">
+          <i className="fa-solid fa-magnifying-glass"></i>
+          <input 
+            type="text" 
+            placeholder="Tìm theo Tên, Email, SĐT..." 
+            value={filters.search}
+            onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+          />
+        </div>
+        <div className="filter-group">
+          <select 
+            value={filters.role} 
+            onChange={(e) => setFilters(prev => ({ ...prev, role: e.target.value }))}
+          >
+            <option value="">Tất cả Vai Trò</option>
+            <option value="admin">Admin</option>
+            <option value="staff">Staff</option>
+            <option value="user">User</option>
+          </select>
+          <select 
+            value={filters.status} 
+            onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+          >
+            <option value="">Tất cả Trạng Thái</option>
+            <option value="1">Hoạt động</option>
+            <option value="0">Đã khóa</option>
+          </select>
+        </div>
       </div>
 
       {loading ? (

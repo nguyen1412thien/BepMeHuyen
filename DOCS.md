@@ -36,6 +36,10 @@ Tài liệu này tổng hợp toàn bộ các tính năng, thay đổi và tối
 - **Backend**: Cập nhật `findAll` trong `userModel.js` để nhận tham số `limit` và `offset`. Thêm hàm `countAll` để lấy tổng số lượng bản ghi. Điều chỉnh `getAllUsers` ở `userController.js` để trả về dữ liệu phân trang (bao gồm `total`, `page`, `totalPages`).
 - **Frontend**: Tạo một Component UI dùng chung là `Pagination` (tại `client/src/components/Pagination/index.jsx` và `.css`) và tích hợp nó vào giao diện `AccountsManager`. Component hỗ trợ logic thông minh để giới hạn số trang hiển thị (thêm dấu `...` khi vượt qua giới hạn), ngăn tràn giao diện.
 
+### 1.5. Tìm Kiếm & Lọc (Search & Filter)
+- **Backend**: Bổ sung object `filters` vào `findAll` và `countAll` trong `userModel.js`. Cho phép truy vấn linh hoạt bằng mệnh đề `LIKE` cho các trường `email`, `full_name`, `phone` và khớp chính xác (`=`) cho `role`, `status`. Controller tự động trích xuất các tham số này từ `req.query`.
+- **Frontend**: Bổ sung thanh công cụ tìm kiếm và lọc (`AccountsManager/index.jsx`). Sử dụng tính năng `debounce` (kỹ thuật trì hoãn 500ms sau khi người dùng ngừng gõ) để tối ưu hóa việc gọi API, giảm tải cho Server. Khi có bất kỳ thay đổi nào về bộ lọc, giao diện tự động reset về trang 1.
+
 ---
 
 ## 2. Chuẩn Hóa Cấu Trúc Dự Án (Refactoring)
@@ -47,19 +51,6 @@ Tài liệu này tổng hợp toàn bộ các tính năng, thay đổi và tối
 
 ### 2.2. Phân Vùng Frontend (Client)
 Chuyển đổi từ mô hình file phẳng (Flat structure) sang mô hình **Tính Năng / Thư mục (Feature-based/Folder-based structure)** cho toàn bộ giao diện:
-
-**Trước đây:**
-```text
-client/src/
-  ├── components/
-  │   ├── Navbar.jsx
-  │   ├── Navbar.css
-  │   └── ...
-  └── pages/
-      ├── Auth.jsx
-      ├── Auth.css
-      └── ...
-```
 
 **Hiện tại (Đã chuẩn hóa):**
 ```text
