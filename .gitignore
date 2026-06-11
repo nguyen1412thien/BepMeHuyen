@@ -14,3 +14,7 @@ Thumbs.db
 # Thư mục biên dịch tĩnh
 dist/
 client/dist/
+
+# File sao lưu mật khẩu gốc của admin tool
+server/scripts/passwords.txt
+

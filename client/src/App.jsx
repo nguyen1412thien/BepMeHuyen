@@ -7,6 +7,7 @@ import Auth from './pages/Auth';
 import Diagnostics from './pages/Diagnostics';
 import MyOrders from './pages/MyOrders';
 import StaffDashboard from './pages/StaffDashboard';
+import Security from './pages/Security';
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -85,6 +86,10 @@ const App = () => {
         <Route 
           path="/my-orders" 
           element={user ? <MyOrders /> : <Navigate to="/auth" />} 
+        />
+        <Route 
+          path="/security" 
+          element={user ? <Security user={user} /> : <Navigate to="/auth" />} 
         />
         <Route 
           path="/dashboard" 

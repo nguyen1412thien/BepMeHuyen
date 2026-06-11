@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../../services/api';
 import AlertModal from '../AlertModal';
-import ChangePasswordModal from '../ChangePasswordModal';
 import './style.css';
 
 const Navbar = ({ user, onLogout }) => {
@@ -16,7 +15,6 @@ const Navbar = ({ user, onLogout }) => {
   const dropdownRef = useRef(null);
 
   // Modal states
-  const [showChangePassword, setShowChangePassword] = useState(false);
   const [alertState, setAlertState] = useState({ isOpen: false, message: '', type: 'info' });
 
   const showAlert = (message, type = 'info') => {
@@ -245,9 +243,9 @@ const Navbar = ({ user, onLogout }) => {
               <span className="user-greeting">
                 <i className="fa-solid fa-circle-user"></i> Chào, <strong>{user.full_name}</strong>
               </span>
-              <button onClick={() => setShowChangePassword(true)} className="btn-icon" title="Đổi mật khẩu" style={{ color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px' }}>
-                <i className="fa-solid fa-key"></i>
-              </button>
+              <Link to="/security" className="btn-icon" title="Bảo mật tài khoản" style={{ color: 'var(--text-secondary)', background: 'none', border: 'none', cursor: 'pointer', padding: '0 8px', display: 'inline-flex', alignItems: 'center' }}>
+                <i className="fa-solid fa-shield-halved"></i>
+              </Link>
               <button onClick={handleLogoutClick} className="btn-logout" title="Đăng xuất">
                 <i className="fa-solid fa-right-from-bracket"></i>
               </button>
@@ -260,12 +258,7 @@ const Navbar = ({ user, onLogout }) => {
         </div>
       </div>
 
-      {showChangePassword && (
-        <ChangePasswordModal 
-          onClose={() => setShowChangePassword(false)} 
-          showAlert={showAlert} 
-        />
-      )}
+
 
       <AlertModal 
         isOpen={alertState.isOpen}
